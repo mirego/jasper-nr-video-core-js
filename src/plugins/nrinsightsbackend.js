@@ -145,7 +145,6 @@ class NRInsightsBackend extends Backend {
   }
 
   pushEventToInsights(ev) {
-    console.log("Pushing event to Insights = ", ev);
     const requestOptions = {
       method: "POST",
       headers: {
@@ -163,7 +162,6 @@ class NRInsightsBackend extends Backend {
       .then((response) => response.json())
       .then((data) => this.insightsRequestResponse(data))
       .catch((error) => {
-        console.log("error", error);
         Log.error("Error:", error, ev);
         // Put back the event and abort current fetch process
         this._eventBuffer.push(ev);

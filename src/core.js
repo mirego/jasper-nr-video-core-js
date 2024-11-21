@@ -67,10 +67,6 @@ class Core {
    * @param {Object} data Data associated to the event.
    */
   static send(eventType, actionName, data) {
-    console.log("================This is from a addPageAction ===============");
-    console.log("eventType", eventType);
-    console.log("data", data);
-    console.log("actionName", actionName);
     if (
       Core.getBackend() == undefined ||
       !(Core.getBackend() instanceof Backend)
@@ -89,7 +85,6 @@ class Core {
       }
     } else {
       // Use the user-defined backend
-
       Core.getBackend().send(eventType, actionName, data);
     }
   }
@@ -117,15 +112,13 @@ let isErrorShown = false;
  * @param {Event} e Event
  */
 function eventHandler(e) {
-  console.log("data", e);
   let data = cleanData(e.data);
   if (Log.level <= Log.Levels.DEBUG) {
     Log.notice("Sent", e.type, data);
   } else {
     Log.notice("Sent", e.type);
   }
-  console.log("from Core Send View");
-  console.log("eventType", e.eventType);
+
   Core.send(e.eventType, e.type, data);
 }
 
