@@ -33,9 +33,7 @@
       }
 
       // Set up a custom backend for event recording, it will be used instead of New Relic Browser Agent
-      const apiKey = "b2c88b28d4d9a88a28077cc8eff0b60aFFFFNRAL";
 
-      const accountId = 11649900;
       // let backend = new nrvideo.NRInsightsBackend("ACCOUNT ID", "API KEY");
       let backend = new nrvideo.NRInsightsBackend(accountId, apiKey);
 
