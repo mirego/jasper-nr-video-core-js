@@ -73,7 +73,13 @@ class Core {
     ) {
       // Use the default backend (NR Agent)
       if (typeof newrelic !== "undefined" && newrelic.addPageAction) {
-        newrelic.addPageAction(eventType, actionName, data);
+        //newrelic.addPageAction(eventType, actionName, data);
+        console.log(
+          "pageAction is getting called",
+          eventType,
+          actionName,
+          data
+        );
       } else {
         if (!isErrorShown) {
           Log.error(
@@ -85,6 +91,7 @@ class Core {
       }
     } else {
       // Use the user-defined backend
+
       Core.getBackend().send(eventType, actionName, data);
     }
   }

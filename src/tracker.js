@@ -1,6 +1,7 @@
 import pkg from "../package.json";
 import Emitter from "./emitter";
 import Chrono from "./chrono";
+import Constants from "./constants";
 
 /**
  * Tracker class provides the basic logic to extend Newrelic's Browser Agent capabilities.
@@ -50,6 +51,12 @@ class Tracker extends Emitter {
      */
     this._trackerReadyChrono = new Chrono();
     this._trackerReadyChrono.start();
+
+    /**
+     * Store the initial table of actions with time 0 ms
+     */
+    this._actionTable = Constants.ACTION_TABLE;
+    this._actionAdTable = Constants.ACTION_AD_TABLE;
 
     options = options || {};
     this.setOptions(options);
@@ -169,7 +176,7 @@ class Tracker extends Emitter {
    * @param {Object} [att] Collection of key:value attributes to send with the request.
    */
   sendHeartbeat(att) {
-    this.sendVideoAction(Tracker.Events.HEARTBEAT, att);
+    this.send(Tracker.Events.HEARTBEAT, att);
   }
 
   /**
@@ -234,20 +241,59 @@ class Tracker extends Emitter {
   //   this.emit(eventType, event, this.getAttributes(att));
   // }
 
+  /**
+   * getElapsedTime: Calculate the time elapsed between two same actions
+   *
+   */
+
+  getElapsedTime(action) {
+    let elapsedTime = 0;
+    this._actionTable.forEach((actionObj) => {
+      if (actionObj.actionName === action) {
+        if (actionObj.time === 0) {
+          actionObj.time = Date.now();
+        } else {
+          elapsedTime = Date.now() - actionObj.time;
+          actionObj.time = Date.now();
+        }
+      }
+    });
+    return elapsedTime;
+  }
+
   sendVideoAction(event, att) {
-    this.emit("VideoAction", event, this.getAttributes(att));
+    let elapsedTime = this.getElapsedTime(event);
+
+    this.emit(
+      "VideoAction",
+      event,
+      this.getAttributes({ elapsedTime, ...att })
+    );
   }
 
   sendVideoAdAction(event, att) {
-    this.emit("VideoAdAction", event, this.getAttributes(att));
+    let elapsedTime = this.getElapsedTime(event);
+
+    this.emit(
+      "VideoAdAction",
+      event,
+      this.getAttributes({ elapsedTime, ...att })
+    );
   }
 
   sendVideoErrorAction(event, att) {
-    this.emit("VideoErrorAction", event, this.getAttributes(att));
+    let elapsedTime = this.getElapsedTime(event);
+    this.emit(
+      "VideoErrorAction",
+      event,
+      this.getAttributes({ elapsedTime, ...att })
+    );
+    //this.emit("VideoErrorAction", event, this.getAttributes(att));
   }
 
   sendVideoCustomAction(event, att) {
     this.emit("VideoCustomAction", event, this.getAttributes(att));
+    //this.emit("VideoCustomAction", event, this.getAttributes(att));
   }
 }
 

@@ -1,5 +1,6 @@
 import Chrono from "./chrono";
 import Log from "./log";
+import { v4 as uuidv4 } from "uuid";
 
 /**
  * State machine for a VideoTracker and its monitored video.
@@ -177,12 +178,13 @@ class VideoTrackerState {
    */
   getViewSession() {
     if (!this._viewSession) {
-      let time = new Date().getTime();
-      let random =
-        Math.random().toString(36).substring(2) +
-        Math.random().toString(36).substring(2);
+      // let time = new Date().getTime();
+      // let random =
+      //   Math.random().toString(36).substring(2) +
+      //   Math.random().toString(36).substring(2);
 
-      this._viewSession = time + "-" + random;
+      // this._viewSession = time + "-" + random;
+      this._viewSession = uuidv4();
     }
 
     return this._viewSession;

@@ -155,12 +155,14 @@ class NRInsightsBackend extends Backend {
     };
 
     const url =
-      "https://staging-insights-collector.newrelic.com/v1/accounts/" +
+      "https://insights-collector.newrelic.com/v1/accounts/" +
       this._accountId +
       "/events";
     fetch(url, requestOptions)
       .then((response) => response.json())
-      .then((data) => this.insightsRequestResponse(data))
+      .then((data) => {
+        this.insightsRequestResponse(data);
+      })
       .catch((error) => {
         Log.error("Error:", error, ev);
         // Put back the event and abort current fetch process

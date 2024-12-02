@@ -412,12 +412,13 @@ class VideoTracker extends Tracker {
     att = Tracker.prototype.getAttributes.apply(this, arguments);
 
     if (typeof att.isAd === "undefined") att.isAd = this.isAd();
+
     att.viewSession = this.getViewSession();
     att.viewId = this.getViewId();
     att.playerName = this.getPlayerName();
     att.playerVersion = this.getPlayerVersion();
-    att["instrumetation.provider"] = "newrelic";
-    att["instrumetation.name"] = "core video";
+    att["instrumetation.provider"] = "Media Streaming";
+    att["instrumetation.name"] = "Core Video";
     att["instrumetation.version"] = pkg.version;
 
     try {
@@ -449,6 +450,7 @@ class VideoTracker extends Tracker {
       att.adPartner = this.getAdPartner();
     } else {
       // no ads
+
       att.contentId = this.getVideoId();
       att.contentTitle = this.getTitle();
       att.contentIsLive = this.isLive();
