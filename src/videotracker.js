@@ -402,13 +402,29 @@ class VideoTracker extends Tracker {
   }
 
   /**
+   * Override to return the instrumentation of the player.
+   */
+
+  getInstrumentationProvider() {
+    return null;
+  }
+
+  getInstrumentationName() {
+    return null;
+  }
+
+  getInstrumentationVersion() {
+    return null;
+  }
+
+  /**
    * Do NOT override. This method fills all the appropiate attributes for tracked video.
    *
    * @param {object} [att] Collection of key value attributes
    * @return {object} Filled attributes
    * @final
    */
-  getAttributes(att) {
+  getAttributes(att, type) {
     att = Tracker.prototype.getAttributes.apply(this, arguments);
 
     if (typeof att.isAd === "undefined") att.isAd = this.isAd();
@@ -417,9 +433,11 @@ class VideoTracker extends Tracker {
     att.viewId = this.getViewId();
     att.playerName = this.getPlayerName();
     att.playerVersion = this.getPlayerVersion();
-    att["instrumetation.provider"] = "Media Streaming";
-    att["instrumetation.name"] = "Core Video";
-    att["instrumetation.version"] = pkg.version;
+    att["instrumetation.provider"] = this.getInstrumentationProvider();
+    att["instrumetation.name"] = this.getInstrumentationName();
+    att["instrumetation.version"] = this.getInstrumentationVersion();
+
+    if (type === "customAction") return att;
 
     try {
       att.pageUrl = window.location.href;
@@ -431,45 +449,51 @@ class VideoTracker extends Tracker {
       // Ads
       att.adId = this.getVideoId();
       att.adTitle = this.getTitle();
-      att.adBitrate = this.getBitrate() || this.getWebkitBitrate();
-      att.adRenditionName = this.getRenditionName();
-      att.adRenditionBitrate = this.getRenditionBitrate();
-      att.adRenditionHeight = this.getRenditionHeight();
-      att.adRenditionWidth = this.getRenditionWidth();
-      att.adDuration = this.getDuration();
-      att.adPlayhead = this.getPlayhead();
-      att.adLanguage = this.getLanguage();
       att.adSrc = this.getSrc();
       att.adCdn = this.getCdn();
-      att.adIsMuted = this.isMuted();
-      att.adFps = this.getFps();
-      // ad exclusives
-      att.adQuartile = this.getAdQuartile();
-      att.adPosition = this.getAdPosition();
-      att.adCreativeId = this.getAdCreativeId();
-      att.adPartner = this.getAdPartner();
+
+      if (type === "adError") {
+        att.adBitrate = this.getBitrate() || this.getWebkitBitrate();
+        att.adRenditionName = this.getRenditionName();
+        att.adRenditionBitrate = this.getRenditionBitrate();
+        att.adRenditionHeight = this.getRenditionHeight();
+        att.adRenditionWidth = this.getRenditionWidth();
+        att.adDuration = this.getDuration();
+        att.adPlayhead = this.getPlayhead();
+        att.adLanguage = this.getLanguage();
+        att.adIsMuted = this.isMuted();
+        att.adFps = this.getFps();
+        // ad exclusives
+        att.adQuartile = this.getAdQuartile();
+        att.adPosition = this.getAdPosition();
+        att.adCreativeId = this.getAdCreativeId();
+        att.adPartner = this.getAdPartner();
+      }
     } else {
       // no ads
-
       att.contentId = this.getVideoId();
       att.contentTitle = this.getTitle();
-      att.contentIsLive = this.isLive();
-      att.contentBitrate = this.getBitrate() || this.getWebkitBitrate();
-      att.contentRenditionName = this.getRenditionName();
-      att.contentRenditionBitrate = this.getRenditionBitrate();
-      att.contentRenditionHeight = this.getRenditionHeight();
-      att.contentRenditionWidth = this.getRenditionWidth();
-      att.contentDuration = this.getDuration();
-      att.contentPlayhead = this.getPlayhead();
-      att.contentLanguage = this.getLanguage();
       att.contentSrc = this.getSrc();
-      att.contentPlayrate = this.getPlayrate();
-      att.contentIsFullscreen = this.isFullscreen();
-      att.contentIsMuted = this.isMuted();
       att.contentCdn = this.getCdn();
-      att.contentIsAutoplayed = this.isAutoplayed();
-      att.contentPreload = this.getPreload();
-      att.contentFps = this.getFps();
+
+      if (type !== "videoError") {
+        att.contentIsLive = this.isLive();
+        att.contentBitrate = this.getBitrate() || this.getWebkitBitrate();
+        att.contentRenditionName = this.getRenditionName();
+        att.contentRenditionBitrate = this.getRenditionBitrate();
+        att.contentRenditionHeight = this.getRenditionHeight();
+        att.contentRenditionWidth = this.getRenditionWidth();
+        att.contentDuration = this.getDuration();
+        att.contentPlayhead = this.getPlayhead();
+        att.contentLanguage = this.getLanguage();
+        att.contentPlayrate = this.getPlayrate();
+        att.contentIsFullscreen = this.isFullscreen();
+        att.contentIsMuted = this.isMuted();
+        att.contentIsAutoplayed = this.isAutoplayed();
+        att.contentPreload = this.getPreload();
+        att.contentFps = this.getFps();
+      }
+
       if (
         this.adsTracker != null &&
         this.adsTracker.state.totalAdPlaytime > 0
@@ -765,6 +789,7 @@ class VideoTracker extends Tracker {
    */
   sendError(att) {
     att = att || {};
+
     att.isAd = this.isAd();
     this.state.goError();
     let ev = this.isAd()

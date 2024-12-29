@@ -74,16 +74,11 @@ class Core {
       // Use the default backend (NR Agent)
       if (typeof newrelic !== "undefined" && newrelic.addPageAction) {
         //newrelic.addPageAction(eventType, actionName, data);
-        console.log(
-          "pageAction is getting called",
-          eventType,
-          actionName,
-          data
-        );
+        newrelic.recordCustomEvent(eventType, { actionName, ...data });
       } else {
         if (!isErrorShown) {
           Log.error(
-            "newrelic.addPageAction() is not available.",
+            "newrelic.recordCustomEvent() is not available.",
             "In order to use NewRelic Video you will need New Relic Browser Agent."
           );
           isErrorShown = true;
@@ -91,7 +86,6 @@ class Core {
       }
     } else {
       // Use the user-defined backend
-
       Core.getBackend().send(eventType, actionName, data);
     }
   }

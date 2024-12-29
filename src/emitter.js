@@ -15,7 +15,7 @@ class Emitter {
    */
   on(event, callback) {
     this._listeners = this._listeners || {};
-    if (typeof callback === 'function') {
+    if (typeof callback === "function") {
       this._listeners[event] = this._listeners[event] || [];
       this._listeners[event].push(callback);
       return this;
@@ -63,8 +63,8 @@ class Emitter {
       });
     }
 
-    if (Array.isArray(this._listeners['*'])) {
-      this._listeners['*'].forEach((callback) => {
+    if (Array.isArray(this._listeners["*"])) {
+      this._listeners["*"].forEach((callback) => {
         callback.call(this, {
           eventType,
           type: event,

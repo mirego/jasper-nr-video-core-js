@@ -68,6 +68,10 @@ Constants.ACTION_TABLE = [
     actionName: "CONTENT_ERROR",
     time: 0,
   },
+  {
+    actionName: "CONTENT_HEARTBEAT",
+    time: 0,
+  },
 
   {
     actionName: "CONTENT_RENDITION_CHANGE",
@@ -131,6 +135,10 @@ Constants.ACTION_TABLE = [
   },
   {
     actionName: "AD_ERROR",
+    time: 0,
+  },
+  {
+    actionName: "AD_HEARTBEAT",
     time: 0,
   },
 ];

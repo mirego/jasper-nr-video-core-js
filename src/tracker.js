@@ -195,7 +195,8 @@ class Tracker extends Emitter {
    * @return {object} Filled attributes
    * @final
    */
-  getAttributes(att) {
+  getAttributes(att, eventType) {
+    console.log("attr", eventType);
     att = att || {};
     att.trackerName = this.getTrackerName();
     att.trackerVersion = this.getTrackerVersion();
@@ -263,7 +264,6 @@ class Tracker extends Emitter {
 
   sendVideoAction(event, att) {
     let elapsedTime = this.getElapsedTime(event);
-
     this.emit(
       "VideoAction",
       event,
@@ -273,7 +273,6 @@ class Tracker extends Emitter {
 
   sendVideoAdAction(event, att) {
     let elapsedTime = this.getElapsedTime(event);
-
     this.emit(
       "VideoAdAction",
       event,
@@ -282,18 +281,21 @@ class Tracker extends Emitter {
   }
 
   sendVideoErrorAction(event, att) {
+    let ev = this.isAd() ? "adError" : "videoError";
     let elapsedTime = this.getElapsedTime(event);
     this.emit(
       "VideoErrorAction",
       event,
-      this.getAttributes({ elapsedTime, ...att })
+      this.getAttributes({ elapsedTime, ...att }, ev)
     );
-    //this.emit("VideoErrorAction", event, this.getAttributes(att));
   }
 
   sendVideoCustomAction(event, att) {
-    this.emit("VideoCustomAction", event, this.getAttributes(att));
-    //this.emit("VideoCustomAction", event, this.getAttributes(att));
+    this.emit(
+      "VideoCustomAction",
+      event,
+      this.getAttributes(att, "customAction")
+    );
   }
 }
 
