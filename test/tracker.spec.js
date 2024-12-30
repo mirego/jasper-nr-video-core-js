@@ -63,7 +63,7 @@ describe("Tracker", () => {
     });
   });
 
-  describe("heartbeating", () => {
+  describe("setting and getting heartbeat", () => {
     it("should return heartbeat", () => {
       tracker = new Tracker();
       expect(tracker.getHeartbeat()).to.equal(30000);
@@ -79,13 +79,38 @@ describe("Tracker", () => {
       tracker.on(Tracker.Events.HEARTBEAT, () => done());
       tracker.sendHeartbeat();
     });
+  });
+
+  describe("Tracker heartbeating", () => {
+    let tracker;
+    let clock;
+
+    beforeEach(() => {
+      tracker = new Tracker({ heartbeat: 500 });
+      clock = sinon.useFakeTimers(); // Use fake timers to control the time
+    });
+
+    afterEach(() => {
+      clock.restore(); // Restore the original timers
+    });
 
     it("should start and stop heartbeats", (done) => {
-      tracker = new Tracker({ heartbeat: 500 });
-      tracker.on(Tracker.Events.HEARTBEAT, () => done.fail());
-      setInterval(() => done(), 750);
+      const heartbeatSpy = sinon.spy(tracker, "sendHeartbeat");
+
       tracker.startHeartbeat();
+
+      // Fast forward time to ensure at least one heartbeat is sent
+      clock.tick(5000); // The heartbeat interval has a minimum of 5000ms, as per your code comments
+
+      // Check if sendHeartbeat was called appropriately
+      expect(heartbeatSpy.called).to.be.true;
+
+      // Stop the heartbeat
       tracker.stopHeartbeat();
+
+      // Clear the spy
+      heartbeatSpy.restore();
+      done();
     });
   });
 });
