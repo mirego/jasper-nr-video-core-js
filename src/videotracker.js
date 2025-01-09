@@ -43,6 +43,7 @@ class VideoTracker extends Tracker {
      * @private
      */
     this._lastBufferType = null;
+    this._userId = null;
 
     options = options || {};
     this.setOptions(options);
@@ -55,6 +56,12 @@ class VideoTracker extends Tracker {
         this.getTrackerVersion() +
         " is ready."
     );
+  }
+
+  /* user can set the user Id  */
+
+  setUserId(userId) {
+    this._userId = userId;
   }
 
   /**
@@ -85,6 +92,7 @@ class VideoTracker extends Tracker {
    * @param {DOMObject|string} [tag] Optional DOMElement to save as this.tag. If a string is passed,
    * document.getElementById will be called.
    */
+
   setPlayer(player, tag) {
     if (this.player || this.tag) this.dispose();
 
@@ -433,9 +441,10 @@ class VideoTracker extends Tracker {
     att.viewId = this.getViewId();
     att.playerName = this.getPlayerName();
     att.playerVersion = this.getPlayerVersion();
-    att["instrumetation.provider"] = this.getInstrumentationProvider();
-    att["instrumetation.name"] = this.getInstrumentationName();
-    att["instrumetation.version"] = this.getInstrumentationVersion();
+    att["instrumentation.provider"] = this.getInstrumentationProvider();
+    att["instrumentation.name"] = this.getInstrumentationName();
+    att["instrumentation.version"] = this.getInstrumentationVersion();
+    att["enduser.id"] = this._userId;
 
     if (type === "customAction") return att;
 
