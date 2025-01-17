@@ -445,6 +445,7 @@ class VideoTracker extends Tracker {
     att["instrumentation.name"] = this.getInstrumentationName();
     att["instrumentation.version"] = this.getInstrumentationVersion();
     att["enduser.id"] = this._userId;
+    att["src"] = "Browser";
 
     if (type === "customAction") return att;
 
@@ -484,6 +485,7 @@ class VideoTracker extends Tracker {
       att.contentTitle = this.getTitle();
       att.contentSrc = this.getSrc();
       att.contentCdn = this.getCdn();
+      att.contentPlayhead = this.getPlayhead();
 
       if (type !== "videoError") {
         att.contentIsLive = this.isLive();
@@ -493,7 +495,7 @@ class VideoTracker extends Tracker {
         att.contentRenditionHeight = this.getRenditionHeight();
         att.contentRenditionWidth = this.getRenditionWidth();
         att.contentDuration = this.getDuration();
-        att.contentPlayhead = this.getPlayhead();
+
         att.contentLanguage = this.getLanguage();
         att.contentPlayrate = this.getPlayrate();
         att.contentIsFullscreen = this.isFullscreen();

@@ -72,8 +72,9 @@ class Core {
       !(Core.getBackend() instanceof Backend)
     ) {
       // Use the default backend (NR Agent)
-      if (typeof newrelic !== "undefined" && newrelic.addPageAction) {
+      if (typeof newrelic !== "undefined" && newrelic.recordCustomEvent) {
         //newrelic.addPageAction(eventType, actionName, data);
+        data.timeSinceLoad = Math.floor(window.performance.now());
         newrelic.recordCustomEvent(eventType, { actionName, ...data });
       } else {
         if (!isErrorShown) {
