@@ -446,6 +446,7 @@ class VideoTracker extends Tracker {
     att["instrumentation.version"] = this.getInstrumentationVersion();
     att["enduser.id"] = this._userId;
     att["src"] = "Browser";
+    att["nr.team"] = "Vertical Visualization";
 
     if (type === "customAction") return att;
 
