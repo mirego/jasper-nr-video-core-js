@@ -461,24 +461,21 @@ class VideoTracker extends Tracker {
       att.adTitle = this.getTitle();
       att.adSrc = this.getSrc();
       att.adCdn = this.getCdn();
-
-      if (type === "adError") {
-        att.adBitrate = this.getBitrate() || this.getWebkitBitrate();
-        att.adRenditionName = this.getRenditionName();
-        att.adRenditionBitrate = this.getRenditionBitrate();
-        att.adRenditionHeight = this.getRenditionHeight();
-        att.adRenditionWidth = this.getRenditionWidth();
-        att.adDuration = this.getDuration();
-        att.adPlayhead = this.getPlayhead();
-        att.adLanguage = this.getLanguage();
-        att.adIsMuted = this.isMuted();
-        att.adFps = this.getFps();
-        // ad exclusives
-        att.adQuartile = this.getAdQuartile();
-        att.adPosition = this.getAdPosition();
-        att.adCreativeId = this.getAdCreativeId();
-        att.adPartner = this.getAdPartner();
-      }
+      att.adBitrate = this.getBitrate() || this.getWebkitBitrate();
+      att.adRenditionName = this.getRenditionName();
+      att.adRenditionBitrate = this.getRenditionBitrate();
+      att.adRenditionHeight = this.getRenditionHeight();
+      att.adRenditionWidth = this.getRenditionWidth();
+      att.adDuration = this.getDuration();
+      att.adPlayhead = this.getPlayhead();
+      att.adLanguage = this.getLanguage();
+      att.adIsMuted = this.isMuted();
+      att.adFps = this.getFps();
+      // ad exclusives
+      att.adQuartile = this.getAdQuartile();
+      att.adPosition = this.getAdPosition();
+      att.adCreativeId = this.getAdCreativeId();
+      att.adPartner = this.getAdPartner();
     } else {
       // no ads
       att.contentId = this.getVideoId();
@@ -487,23 +484,21 @@ class VideoTracker extends Tracker {
       att.contentCdn = this.getCdn();
       att.contentPlayhead = this.getPlayhead();
 
-      if (type !== "videoError") {
-        att.contentIsLive = this.isLive();
-        att.contentBitrate = this.getBitrate() || this.getWebkitBitrate();
-        att.contentRenditionName = this.getRenditionName();
-        att.contentRenditionBitrate = this.getRenditionBitrate();
-        att.contentRenditionHeight = this.getRenditionHeight();
-        att.contentRenditionWidth = this.getRenditionWidth();
-        att.contentDuration = this.getDuration();
+      att.contentIsLive = this.isLive();
+      att.contentBitrate = this.getBitrate() || this.getWebkitBitrate();
+      att.contentRenditionName = this.getRenditionName();
+      att.contentRenditionBitrate = this.getRenditionBitrate();
+      att.contentRenditionHeight = this.getRenditionHeight();
+      att.contentRenditionWidth = this.getRenditionWidth();
+      att.contentDuration = this.getDuration();
 
-        att.contentLanguage = this.getLanguage();
-        att.contentPlayrate = this.getPlayrate();
-        att.contentIsFullscreen = this.isFullscreen();
-        att.contentIsMuted = this.isMuted();
-        att.contentIsAutoplayed = this.isAutoplayed();
-        att.contentPreload = this.getPreload();
-        att.contentFps = this.getFps();
-      }
+      att.contentLanguage = this.getLanguage();
+      att.contentPlayrate = this.getPlayrate();
+      att.contentIsFullscreen = this.isFullscreen();
+      att.contentIsMuted = this.isMuted();
+      att.contentIsAutoplayed = this.isAutoplayed();
+      att.contentPreload = this.getPreload();
+      att.contentFps = this.getFps();
 
       if (
         this.adsTracker != null &&
