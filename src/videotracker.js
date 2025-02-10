@@ -1041,8 +1041,7 @@ VideoTracker.Events = {
 
 // Private members
 function funnelAdEvents(e) {
-  // this.send(e.type, e.data);
-  //this.sendVideoAdAction(e.type, e.data);
+  this.sendVideoAdAction(e.type, e.data);
 }
 
 export default VideoTracker;
