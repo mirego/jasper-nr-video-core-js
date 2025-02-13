@@ -476,7 +476,7 @@ class VideoTracker extends Tracker {
       att.adIsMuted = this.isMuted();
       att.adFps = this.getFps();
       // ad exclusives
-      att.adQuartile = this.getAdQuartile();
+      //att.adQuartile = this.getAdQuartile();
       att.adPosition = this.getAdPosition();
       att.adCreativeId = this.getAdCreativeId();
       att.adPartner = this.getAdPartner();
@@ -874,7 +874,7 @@ class VideoTracker extends Tracker {
 
     if (this.state.isPaused) {
       elapsedTime -= this.state.elapsedTime.getDeltaTime();
-      if (elapsedTime < 5) elapsedTime = 0;
+      if (elapsedTime < 10) elapsedTime = 0;
       this.state.elapsedTime.start();
     }
 
@@ -941,6 +941,7 @@ class VideoTracker extends Tracker {
       att.timeSinceLastAdQuartile =
         this.state.timeSinceLastAdQuartile.getDeltaTime();
       //this.send(VideoTracker.Events.AD_QUARTILE, att);
+
       this.sendVideoAdAction(VideoTracker.Events.AD_QUARTILE, att);
       this.state.goAdQuartile();
     }

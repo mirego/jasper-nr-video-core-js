@@ -129,7 +129,8 @@ class Tracker extends Emitter {
    */
   getHeartbeat() {
     if (this.state._isAd) {
-      return 5000;
+      // modifying heartbeat for Ad Tracker
+      return 2000;
     } else {
       if (this.heartbeat) {
         return this.heartbeat;
@@ -142,13 +143,13 @@ class Tracker extends Emitter {
   }
 
   /**
-   * Starts heartbeating. Interval period set by options.heartbeat. Min 5000 ms.
+   * Starts heartbeating. Interval period set by options.heartbeat. Min 2000 ms.
    * This method is automaticaly called by the tracker once sendRequest is called.
    */
   startHeartbeat() {
     this._heartbeatInterval = setInterval(
       this.sendHeartbeat.bind(this),
-      Math.max(this.getHeartbeat(), 5000)
+      Math.max(this.getHeartbeat(), 2000)
     );
   }
 
