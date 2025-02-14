@@ -9,11 +9,16 @@ class VideoTrackerState {
   constructor() {
     this.reset();
 
+    //this.setupNetworkListeners();
+
     /**
      * Time when the VideoTrackerState was initializated.
      * @private
      */
     this._createdAt = Date.now();
+    this._hb = true;
+    this._acc = 0;
+    this._bufferAcc = 0;
   }
 
   /** Resets all flags and chronos. */
@@ -141,6 +146,10 @@ class VideoTrackerState {
 
     /** A dictionary containing the custom timeSince attributes. */
     this.customTimeSinceAttributes = {};
+
+    /** This are used to collect the time of buffred and pause resume between two heartbeats */
+    this.elapsedTime = new Chrono();
+    this.bufferElapsedTime = new Chrono();
   }
 
   /** Returns true if the tracker is currently on ads. */
@@ -315,6 +324,7 @@ class VideoTrackerState {
   goRequest() {
     if (!this.isRequested) {
       this.isRequested = true;
+
       this.timeSinceLastAd.reset();
       this.timeSinceRequested.start();
       return true;
@@ -372,6 +382,10 @@ class VideoTrackerState {
       this.timeSincePaused.start();
       this.playtimeSinceLastEvent.stop();
       this.timeSinceResumed.reset();
+      if (this.isBuffering) {
+        this._bufferAcc += this.bufferElapsedTime.getDeltaTime();
+      }
+      this.elapsedTime.start();
       return true;
     } else {
       return false;
@@ -388,6 +402,15 @@ class VideoTrackerState {
       this.isPlaying = true;
       this.timeSincePaused.stop();
       this.timeSinceResumed.start();
+      if (this._hb) {
+        this._acc = this.elapsedTime.getDeltaTime();
+        this._hb = false;
+      } else {
+        if (this.isBuffering) {
+          this.bufferElapsedTime.start();
+        }
+        this._acc += this.elapsedTime.getDeltaTime();
+      }
       return true;
     } else {
       return false;
@@ -403,6 +426,8 @@ class VideoTrackerState {
       this.isBuffering = true;
       this.isPlaying = false;
       this.timeSinceBufferBegin.start();
+      this.bufferElapsedTime.start();
+
       return true;
     } else {
       return false;
@@ -418,6 +443,13 @@ class VideoTrackerState {
       this.isBuffering = false;
       this.isPlaying = true;
       this.timeSinceBufferBegin.stop();
+      if (this._hb) {
+        this._bufferAcc = this.bufferElapsedTime.getDeltaTime();
+        this._hb = false;
+      } else {
+        this._bufferAcc += this.bufferElapsedTime.getDeltaTime();
+      }
+
       return true;
     } else {
       return false;
@@ -434,6 +466,10 @@ class VideoTrackerState {
       this.isPlaying = false;
       this.timeSinceSeekBegin.start();
       this.timeSinceSeekEnd.reset();
+
+      //new
+      // this.seekStartTime = Date.now();
+
       return true;
     } else {
       return false;
@@ -450,6 +486,11 @@ class VideoTrackerState {
       this.isPlaying = true;
       this.timeSinceSeekBegin.stop();
       this.timeSinceSeekEnd.start();
+
+      //new
+      // this.seekEndTime = Date.now();
+      // this.seekDuration = this.seekEndTime - this.seekStartTime;
+
       return true;
     } else {
       return false;
@@ -518,6 +559,7 @@ class VideoTrackerState {
    * Increments error counter.
    */
   goError() {
+    this.isError = true;
     this.numberOfErrors++;
   }
 

@@ -128,23 +128,28 @@ class Tracker extends Emitter {
    * @final
    */
   getHeartbeat() {
-    if (this.heartbeat) {
-      return this.heartbeat;
-    } else if (this.parentTracker && this.parentTracker.heartbeat) {
-      return this.parentTracker.heartbeat;
+    if (this.state._isAd) {
+      // modifying heartbeat for Ad Tracker
+      return 2000;
     } else {
-      return 30000;
+      if (this.heartbeat) {
+        return this.heartbeat;
+      } else if (this.parentTracker && this.parentTracker.heartbeat) {
+        return this.parentTracker.heartbeat;
+      } else {
+        return 30000;
+      }
     }
   }
 
   /**
-   * Starts heartbeating. Interval period set by options.heartbeat. Min 5000 ms.
+   * Starts heartbeating. Interval period set by options.heartbeat. Min 2000 ms.
    * This method is automaticaly called by the tracker once sendRequest is called.
    */
   startHeartbeat() {
     this._heartbeatInterval = setInterval(
       this.sendHeartbeat.bind(this),
-      Math.max(this.getHeartbeat(), 5000)
+      Math.max(this.getHeartbeat(), 2000)
     );
   }
 
@@ -196,7 +201,6 @@ class Tracker extends Emitter {
    * @final
    */
   getAttributes(att, eventType) {
-    console.log("attr", eventType);
     att = att || {};
     att.trackerName = this.getTrackerName();
     att.trackerVersion = this.getTrackerVersion();
@@ -234,60 +238,23 @@ class Tracker extends Emitter {
    * @param {string} event Event name
    * @param {object} [att] Key:value dictionary filled with attributes.
    */
-  // send(event, att) {
-  //   this.emit(event, this.getAttributes(att));
-  // }
-
-  // send(eventType, event, att) {
-  //   this.emit(eventType, event, this.getAttributes(att));
-  // }
 
   /**
    * getElapsedTime: Calculate the time elapsed between two same actions
    *
    */
 
-  getElapsedTime(action) {
-    let elapsedTime = 0;
-    this._actionTable.forEach((actionObj) => {
-      if (actionObj.actionName === action) {
-        if (actionObj.time === 0) {
-          actionObj.time = Date.now();
-        } else {
-          elapsedTime = Date.now() - actionObj.time;
-          actionObj.time = Date.now();
-        }
-      }
-    });
-    return elapsedTime;
-  }
-
   sendVideoAction(event, att) {
-    let elapsedTime = this.getElapsedTime(event);
-    this.emit(
-      "VideoAction",
-      event,
-      this.getAttributes({ elapsedTime, ...att })
-    );
+    this.emit("VideoAction", event, this.getAttributes(att));
   }
 
   sendVideoAdAction(event, att) {
-    let elapsedTime = this.getElapsedTime(event);
-    this.emit(
-      "VideoAdAction",
-      event,
-      this.getAttributes({ elapsedTime, ...att })
-    );
+    this.emit("VideoAdAction", event, this.getAttributes(att));
   }
 
   sendVideoErrorAction(event, att) {
     let ev = this.isAd() ? "adError" : "videoError";
-    let elapsedTime = this.getElapsedTime(event);
-    this.emit(
-      "VideoErrorAction",
-      event,
-      this.getAttributes({ elapsedTime, ...att }, ev)
-    );
+    this.emit("VideoErrorAction", event, this.getAttributes(att, ev));
   }
 
   sendVideoCustomAction(event, att) {

@@ -77,8 +77,12 @@ class VideoTracker extends Tracker {
    */
   setOptions(options) {
     if (options) {
-      if (options.adsTracker) this.setAdsTracker(options.adsTracker);
-      if (typeof options.isAd === "boolean") this.setIsAd(options.isAd);
+      if (options.adsTracker) {
+        this.setAdsTracker(options.adsTracker);
+      }
+      if (typeof options.isAd === "boolean") {
+        this.setIsAd(options.isAd);
+      }
       Tracker.prototype.setOptions.apply(this, arguments);
     }
   }
@@ -472,7 +476,7 @@ class VideoTracker extends Tracker {
       att.adIsMuted = this.isMuted();
       att.adFps = this.getFps();
       // ad exclusives
-      att.adQuartile = this.getAdQuartile();
+      //att.adQuartile = this.getAdQuartile();
       att.adPosition = this.getAdPosition();
       att.adCreativeId = this.getAdCreativeId();
       att.adPartner = this.getAdPartner();
@@ -549,16 +553,17 @@ class VideoTracker extends Tracker {
    */
   sendRequest(att) {
     if (this.state.goRequest()) {
-      let ev = this.isAd()
-        ? VideoTracker.Events.AD_REQUEST
-        : VideoTracker.Events.CONTENT_REQUEST;
+      let ev;
+      if (this.isAd()) {
+        ev = VideoTracker.Events.AD_REQUEST;
+        this.sendVideoAdAction(ev, att);
+      } else {
+        ev = VideoTracker.Events.CONTENT_REQUEST;
+        this.sendVideoAction(ev, att);
+      }
 
-      this.isAd()
-        ? this.sendVideoAdAction(ev, att)
-        : this.sendVideoAction(ev, att);
-      // this.send(ev, att);
-      this.startHeartbeat();
-      this.state.goHeartbeat();
+      // this.startHeartbeat();
+      // this.state.goHeartbeat();
     }
   }
 
@@ -579,6 +584,8 @@ class VideoTracker extends Tracker {
         this.sendVideoAction(ev, att);
       }
       //this.send(ev, att);
+      this.startHeartbeat();
+      this.state.goHeartbeat();
     }
   }
 
@@ -841,17 +848,48 @@ class VideoTracker extends Tracker {
   sendHeartbeat(att) {
     if (this.state.isRequested) {
       let ev;
+
+      let elapsedTime = this.getHeartbeat();
+      this.state._hb = true;
+      elapsedTime = this.adjustElapsedTimeForPause(elapsedTime);
+
       if (this.isAd()) {
         ev = VideoTracker.Events.AD_HEARTBEAT;
       } else {
         ev = VideoTracker.Events.CONTENT_HEARTBEAT;
       }
-      //this.send(ev, att);
+
       this.isAd()
-        ? this.sendVideoAdAction(ev, att)
-        : this.sendVideoAction(ev, att);
+        ? this.sendVideoAdAction(ev, { elapsedTime, ...att })
+        : this.sendVideoAction(ev, { elapsedTime, ...att });
       this.state.goHeartbeat();
     }
+  }
+
+  adjustElapsedTimeForPause(elapsedTime) {
+    if (this.state._acc) {
+      elapsedTime -= this.state._acc;
+      this.state._acc = 0;
+    }
+
+    if (this.state.isPaused) {
+      elapsedTime -= this.state.elapsedTime.getDeltaTime();
+      if (elapsedTime < 10) elapsedTime = 0;
+      this.state.elapsedTime.start();
+    }
+
+    if (this.state._bufferAcc) {
+      elapsedTime -= this.state._bufferAcc;
+      this.state._bufferAcc = 0;
+    } else if (this.state.isBuffering) {
+      elapsedTime -= this.state.bufferElapsedTime.getDeltaTime();
+      if (elapsedTime < 5) {
+        elapsedTime = 0;
+      }
+      this.state.bufferElapsedTime.start();
+    }
+
+    return Math.max(0, elapsedTime);
   }
 
   // Only ads
@@ -903,6 +941,7 @@ class VideoTracker extends Tracker {
       att.timeSinceLastAdQuartile =
         this.state.timeSinceLastAdQuartile.getDeltaTime();
       //this.send(VideoTracker.Events.AD_QUARTILE, att);
+
       this.sendVideoAdAction(VideoTracker.Events.AD_QUARTILE, att);
       this.state.goAdQuartile();
     }
@@ -1003,7 +1042,6 @@ VideoTracker.Events = {
 
 // Private members
 function funnelAdEvents(e) {
-  // this.send(e.type, e.data);
   this.sendVideoAdAction(e.type, e.data);
 }
 
