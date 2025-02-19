@@ -73,7 +73,10 @@ class Core {
     ) {
       // Use the default backend (NR Agent)
       if (typeof newrelic !== "undefined" && newrelic.recordCustomEvent) {
-        data["timeSinceLoad"] = window.performance.now() / 1000;
+        if (data !== undefined) {
+          data["timeSinceLoad"] = window.performance.now() / 1000;
+        }
+
         newrelic.recordCustomEvent(eventType, { actionName, ...data });
       } else {
         if (!isErrorShown) {
