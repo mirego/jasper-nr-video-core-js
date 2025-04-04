@@ -43,6 +43,7 @@
   "files": [
     "THIRD_PARTY_NOTICES.md",
     "dist",
+    "src",
     "!test"
   ]
 }
