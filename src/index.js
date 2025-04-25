@@ -10,7 +10,7 @@ import VideoTracker from "./videotracker";
 import VideoTrackerState from "./videotrackerstate";
 import { version } from "../package.json";
 
-export {
+const nrvideo = {
   Constants,
   Chrono,
   Log,
@@ -23,3 +23,4 @@ export {
   NRInsightsBackend,
   version,
 };
+export default nrvideo;
