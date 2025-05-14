@@ -2,6 +2,10 @@
 
 All notable changes to this project will be documented in this file.
 
+## [3.0.1] - 2025-05-14
+
+- **Support:** Added support for publishing the package to npm.
+
 ## [3.0.0] - 2025/02/20
 
 ### New Event Type Introduced [VideoAction, VideoErrorAction, VideoAdAction, VideoCustomAction]
