@@ -8,19 +8,10 @@ on:
         required: false
         type: string
         default: 'lts/*'
-      s3-bucket:
-        description: 'S3 bucket to upload to'
-        required: false
-        type: string
       s3-path:
         description: 'Path within the S3 bucket'
         required: false
         type: string
-      aws-region:
-        description: 'AWS Region'
-        required: false
-        type: string
-        default: 'us-east-1'
       publish-to-npm:
         description: 'Whether to publish to NPM'
         required: false
@@ -28,19 +19,6 @@ on:
         default: false
       file-to-upload:
         description: 'Specific file to upload to S3'
-        required: false
-        type: string
-    secrets:
-      NPM_TOKEN:
-        description: 'NPM token for publishing'
-        required: false
-        type: string
-      AWS_ACCESS_KEY_ID:
-        description: 'AWS Access Key ID'
-        required: false
-        type: string
-      AWS_SECRET_ACCESS_KEY:
-        description: 'AWS Secret Access Key'
         required: false
         type: string
 
@@ -81,16 +59,17 @@ jobs:
         run: npx semantic-release
 
       - name: Configure AWS Credentials
-        if: ${{ inputs.s3-bucket != '' && inputs.s3-path != '' }}
+        if: ${{ inputs.s3-path != '' }}
         uses: aws-actions/configure-aws-credentials@v2
         with:
           aws-access-key-id: ${{ secrets.AWS_ACCESS_KEY_ID }}
           aws-secret-access-key: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
-          aws-region: ${{ inputs.aws-region || 'us-east-1' }}
+          aws-region: us-east-1
 
       - name: Upload to S3
-        if: ${{ inputs.s3-bucket != '' && inputs.s3-path != '' && inputs.file-to-upload != '' }}
+        if: ${{ inputs.s3-path != '' && inputs.file-to-upload != '' }}
         run: |
           FILE_NAME=$(basename "${{ inputs.file-to-upload }}")
-          aws s3 cp "${{ inputs.file-to-upload }}" s3://${{ inputs.s3-bucket }}/${{ inputs.s3-path }}/${FILE_NAME}.${{ env.PACKAGE_VERSION }}.min.js
-          aws s3 cp "${{ inputs.file-to-upload }}" s3://${{ inputs.s3-bucket }}/${{ inputs.s3-path }}/${FILE_NAME}.latest.min.js
+          S3_BUCKET="nr-downloads-main" # Hardcoded S3 bucket name
+          aws s3 cp "${{ inputs.file-to-upload }}" s3://${S3_BUCKET}/${{ inputs.s3-path }}/${FILE_NAME}.${{ env.PACKAGE_VERSION }}.min.js
+          aws s3 cp "${{ inputs.file-to-upload }}" s3://${S3_BUCKET}/${{ inputs.s3-path }}/${FILE_NAME}.latest.min.js
