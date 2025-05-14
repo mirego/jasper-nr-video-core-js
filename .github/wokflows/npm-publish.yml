@@ -1,40 +1,96 @@
-name: Publish Module
+name: Publish and Deploy
 
 on:
-  workflow_dispatch:
+  workflow_call:
+    inputs:
+      node-version:
+        description: 'Node.js version to use'
+        required: false
+        type: string
+        default: 'lts/*'
+      s3-bucket:
+        description: 'S3 bucket to upload to'
+        required: false
+        type: string
+      s3-path:
+        description: 'Path within the S3 bucket'
+        required: false
+        type: string
+      aws-region:
+        description: 'AWS Region'
+        required: false
+        type: string
+        default: 'us-east-1'
+      publish-to-npm:
+        description: 'Whether to publish to NPM'
+        required: false
+        type: boolean
+        default: false
+      file-to-upload:
+        description: 'Specific file to upload to S3'
+        required: false
+        type: string
+    secrets:
+      NPM_TOKEN:
+        description: 'NPM token for publishing'
+        required: false
+        type: string
+      AWS_ACCESS_KEY_ID:
+        description: 'AWS Access Key ID'
+        required: false
+        type: string
+      AWS_SECRET_ACCESS_KEY:
+        description: 'AWS Secret Access Key'
+        required: false
+        type: string
 
 jobs:
-  publish-module:
+  publish_and_deploy:
     runs-on: ubuntu-latest
-    permissions:
-      contents: write
-      packages: write
-    strategy:
-      matrix:
-        node-version: [lts/*]
-
     steps:
-    - uses: actions/checkout@v3
-    - name: Use Node.js ${{ matrix.node-version}}
-      uses: actions/setup-node@v3
-      with:
-        node-version: ${{ matrix.node-version }}
-        registry-url: 'https://registry.npmjs.org'
-    - name: Install dependencies
-      run: npm ci
-    - name: Build module
-      run: npm run build
-    - name: Setup GitHub Credentials
-      run: |
-        git config user.name $GITHUB_ACTOR
-        git config user.email gh-actions-${GITHUB_ACTOR}@github.com
-    - name: Publish module
-      run: npm publish
-      env:
-        NODE_AUTH_TOKEN: ${{ secrets.NPM_TOKEN }}
-    - name: Create and push tag 
-      run: |
-        VERSION=`node -e "const { version } = require('./package.json'); console.log(version);"`
-        git tag v$VERSION
-        git push --tags
+      - name: Checkout code
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
 
+      - name: Set up Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: ${{ inputs.node-version || 'lts/*' }}
+          cache: 'npm'
+
+      - name: Install dependencies
+        run: npm ci
+
+      - name: Build project
+        run: npm run build
+
+      - name: Get Package Version
+        id: package-version
+        run: echo "PACKAGE_VERSION=$(node -p \"require('./package.json').version\")" >> $GITHUB_ENV
+
+      - name: Run security audit
+        if: ${{ inputs.publish-to-npm || github.event_name == 'push' }}
+        run: npm audit --audit-level=critical
+
+      - name: Publish to NPM
+        if: ${{ inputs.publish-to-npm || github.event_name == 'push' }}
+        env:
+          NPM_TOKEN: ${{ secrets.NPM_TOKEN }}
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        run: npx semantic-release
+
+      - name: Configure AWS Credentials
+        if: ${{ inputs.s3-bucket != '' && inputs.s3-path != '' }}
+        uses: aws-actions/configure-aws-credentials@v2
+        with:
+          aws-access-key-id: ${{ secrets.AWS_ACCESS_KEY_ID }}
+          aws-secret-access-key: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
+          aws-region: ${{ inputs.aws-region || 'us-east-1' }}
+
+      - name: Upload to S3
+        if: ${{ inputs.s3-bucket != '' && inputs.s3-path != '' && inputs.file-to-upload != '' }}
+        run: |
+          FILE_NAME=$(basename "${{ inputs.file-to-upload }}")
+          aws s3 cp "${{ inputs.file-to-upload }}" s3://${{ inputs.s3-bucket }}/${{ inputs.s3-path }}/${FILE_NAME}.${{ env.PACKAGE_VERSION }}.min.js
+          aws s3 cp "${{ inputs.file-to-upload }}" s3://${{ inputs.s3-bucket }}/${{ inputs.s3-path }}/${FILE_NAME}.latest.min.js
