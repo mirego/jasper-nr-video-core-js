@@ -21,9 +21,29 @@ on:
         description: 'Specific file to upload to S3'
         required: false
         type: string
+    secrets:
+      NPM_TOKEN:
+        description: 'NPM token for publishing'
+        required: false
+      AWS_ACCESS_KEY_ID:
+        description: 'AWS Access Key ID'
+        required: false
+      AWS_SECRET_ACCESS_KEY:
+        description: 'AWS Secret Access Key'
+        required: false
+
+  pull_request:
+    branches:
+      - stable
+    types:
+      - closed
+
+permissions:
+  contents: write
 
 jobs:
   publish_and_deploy:
+    if: ${{ github.event.pull_request.merged == true || github.event_name == 'workflow_call' }}
     runs-on: ubuntu-latest
     steps:
       - name: Checkout code
@@ -45,18 +65,19 @@ jobs:
 
       - name: Get Package Version
         id: package-version
-        run: echo "PACKAGE_VERSION=$(node -p \"require('./package.json').version\")" >> $GITHUB_ENV
+        run: |
+          PACKAGE_VERSION=$(node -p "require('./package.json').version")
+          echo "PACKAGE_VERSION=$PACKAGE_VERSION" >> $GITHUB_ENV
 
       - name: Run security audit
-        if: ${{ inputs.publish-to-npm || github.event_name == 'push' }}
         run: npm audit --audit-level=critical
 
       - name: Publish to NPM
-        if: ${{ inputs.publish-to-npm || github.event_name == 'push' }}
         env:
           NPM_TOKEN: ${{ secrets.NPM_TOKEN }}
-          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-        run: npx semantic-release
+        run: |
+          echo "//registry.npmjs.org/:_authToken=${NPM_TOKEN}" > ~/.npmrc
+          npm publish
 
       - name: Configure AWS Credentials
         if: ${{ inputs.s3-path != '' }}
@@ -70,6 +91,6 @@ jobs:
         if: ${{ inputs.s3-path != '' && inputs.file-to-upload != '' }}
         run: |
           FILE_NAME=$(basename "${{ inputs.file-to-upload }}")
-          S3_BUCKET="nr-downloads-main" # Hardcoded S3 bucket name
+          S3_BUCKET="nr-downloads-main"
           aws s3 cp "${{ inputs.file-to-upload }}" s3://${S3_BUCKET}/${{ inputs.s3-path }}/${FILE_NAME}.${{ env.PACKAGE_VERSION }}.min.js
           aws s3 cp "${{ inputs.file-to-upload }}" s3://${S3_BUCKET}/${{ inputs.s3-path }}/${FILE_NAME}.latest.min.js
