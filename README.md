@@ -39,9 +39,7 @@ _Browser Agent_, allowing you to manage and send events to New Relic.
 First of all, you have to add a tracker in the core class:
 
 ```javascript
-// var nrvideo = require('newrelic-video-core')
-var tracker = new nrvideo.VideoTracker();
-nrvideo.Core.addTracker(tracker);
+var tracker = new VideoTracker(player);
 ```
 
 Once the tracker is added, any event it emits will be sent to New Relic and processed by the following functions:
