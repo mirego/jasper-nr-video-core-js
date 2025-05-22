@@ -48,5 +48,8 @@
     "CHANGELOG.md",
     "README.md",
     "!test"
-  ]
+  ],
+   "publishConfig": {
+    "access": "public"
+  }
 }
