@@ -12,11 +12,6 @@ on:
         description: 'Path within the S3 bucket'
         required: false
         type: string
-      publish-to-npm:
-        description: 'Whether to publish to NPM'
-        required: false
-        type: boolean
-        default: false
       file-to-upload:
         description: 'Specific file to upload to S3'
         required: false
