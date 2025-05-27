@@ -26,10 +26,12 @@ code, the source code can be found at [https://github.com/newrelic/video-core-js
 * [babel-loader](#babel-loader)
 * [chai](#chai)
 * [diff](#diff)
+* [jsdom](#jsdom)
 * [mocha](#mocha)
 * [nyc](#nyc)
 * [sinon](#sinon)
 * [webpack-cli](#webpack-cli)
+* [webpack-obfuscator](#webpack-obfuscator)
 * [webpack](#webpack)
 
 **[optionalDependencies](#optionalDependencies)**
@@ -43,7 +45,7 @@ code, the source code can be found at [https://github.com/newrelic/video-core-js
 
 ### @babel/core
 
-This product includes source derived from [@babel/core](https://github.com/babel/babel) ([v7.24.6](https://github.com/babel/babel/tree/v7.24.6)), distributed under the [MIT License](https://github.com/babel/babel/blob/v7.24.6/LICENSE):
+This product includes source derived from [@babel/core](https://github.com/babel/babel) ([v7.26.10](https://github.com/babel/babel/tree/v7.26.10)), distributed under the [MIT License](https://github.com/babel/babel/blob/v7.26.10/LICENSE):
 
 ```
 MIT License
@@ -73,7 +75,7 @@ WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 
 ### @babel/plugin-transform-modules-commonjs
 
-This product includes source derived from [@babel/plugin-transform-modules-commonjs](https://github.com/babel/babel) ([v7.24.6](https://github.com/babel/babel/tree/v7.24.6)), distributed under the [MIT License](https://github.com/babel/babel/blob/v7.24.6/LICENSE):
+This product includes source derived from [@babel/plugin-transform-modules-commonjs](https://github.com/babel/babel) ([v7.26.3](https://github.com/babel/babel/tree/v7.26.3)), distributed under the [MIT License](https://github.com/babel/babel/blob/v7.26.3/LICENSE):
 
 ```
 MIT License
@@ -103,7 +105,7 @@ WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 
 ### @babel/preset-env
 
-This product includes source derived from [@babel/preset-env](https://github.com/babel/babel) ([v7.24.6](https://github.com/babel/babel/tree/v7.24.6)), distributed under the [MIT License](https://github.com/babel/babel/blob/v7.24.6/LICENSE):
+This product includes source derived from [@babel/preset-env](https://github.com/babel/babel) ([v7.26.9](https://github.com/babel/babel/tree/v7.26.9)), distributed under the [MIT License](https://github.com/babel/babel/blob/v7.26.9/LICENSE):
 
 ```
 MIT License
@@ -133,7 +135,7 @@ WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 
 ### @babel/register
 
-This product includes source derived from [@babel/register](https://github.com/babel/babel) ([v7.24.6](https://github.com/babel/babel/tree/v7.24.6)), distributed under the [MIT License](https://github.com/babel/babel/blob/v7.24.6/LICENSE):
+This product includes source derived from [@babel/register](https://github.com/babel/babel) ([v7.25.9](https://github.com/babel/babel/tree/v7.25.9)), distributed under the [MIT License](https://github.com/babel/babel/blob/v7.25.9/LICENSE):
 
 ```
 MIT License
@@ -371,7 +373,7 @@ This product includes source derived from [@newrelic/newrelic-oss-cli](https://g
 
 ### aws-sdk
 
-This product includes source derived from [aws-sdk](https://github.com/aws/aws-sdk-js) ([v2.1453.0](https://github.com/aws/aws-sdk-js/tree/v2.1453.0)), distributed under the [Apache-2.0 License](https://github.com/aws/aws-sdk-js/blob/v2.1453.0/LICENSE.txt):
+This product includes source derived from [aws-sdk](https://github.com/aws/aws-sdk-js) ([v2.1692.0](https://github.com/aws/aws-sdk-js/tree/v2.1692.0)), distributed under the [Apache-2.0 License](https://github.com/aws/aws-sdk-js/blob/v2.1692.0/LICENSE.txt):
 
 ```
 
@@ -581,7 +583,7 @@ This product includes source derived from [aws-sdk](https://github.com/aws/aws-s
 
 ### babel-loader
 
-This product includes source derived from [babel-loader](https://github.com/babel/babel-loader) ([v9.1.3](https://github.com/babel/babel-loader/tree/v9.1.3)), distributed under the [MIT License](https://github.com/babel/babel-loader/blob/v9.1.3/LICENSE):
+This product includes source derived from [babel-loader](https://github.com/babel/babel-loader) ([v9.2.1](https://github.com/babel/babel-loader/tree/v9.2.1)), distributed under the [MIT License](https://github.com/babel/babel-loader/blob/v9.2.1/LICENSE):
 
 ```
 Copyright (c) 2014-2019 Luís Couto <hello@luiscouto.pt>
@@ -611,7 +613,7 @@ WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 
 ### chai
 
-This product includes source derived from [chai](https://github.com/chaijs/chai) ([v4.3.4](https://github.com/chaijs/chai/tree/v4.3.4)), distributed under the [MIT License](https://github.com/chaijs/chai/blob/v4.3.4/LICENSE):
+This product includes source derived from [chai](https://github.com/chaijs/chai) ([v4.5.0](https://github.com/chaijs/chai/tree/v4.5.0)), distributed under the [MIT License](https://github.com/chaijs/chai/blob/v4.5.0/LICENSE):
 
 ```
 MIT License
@@ -640,50 +642,79 @@ SOFTWARE.
 
 ### diff
 
-This product includes source derived from [diff](https://github.com/kpdecker/jsdiff) ([v5.0.0](https://github.com/kpdecker/jsdiff/tree/v5.0.0)), distributed under the [BSD-3-Clause License](https://github.com/kpdecker/jsdiff/blob/v5.0.0/LICENSE):
+This product includes source derived from [diff](https://github.com/kpdecker/jsdiff) ([v5.2.0](https://github.com/kpdecker/jsdiff/tree/v5.2.0)), distributed under the [BSD-3-Clause License](https://github.com/kpdecker/jsdiff/blob/v5.2.0/LICENSE):
 
 ```
-Software License Agreement (BSD License)
+BSD 3-Clause License
 
 Copyright (c) 2009-2015, Kevin Decker <kpdecker@gmail.com>
-
 All rights reserved.
 
-Redistribution and use of this software in source and binary forms, with or without modification,
-are permitted provided that the following conditions are met:
+Redistribution and use in source and binary forms, with or without
+modification, are permitted provided that the following conditions are met:
 
-* Redistributions of source code must retain the above
-  copyright notice, this list of conditions and the
-  following disclaimer.
+1. Redistributions of source code must retain the above copyright notice, this
+   list of conditions and the following disclaimer.
 
-* Redistributions in binary form must reproduce the above
-  copyright notice, this list of conditions and the
-  following disclaimer in the documentation and/or other
-  materials provided with the distribution.
+2. Redistributions in binary form must reproduce the above copyright notice,
+   this list of conditions and the following disclaimer in the documentation
+   and/or other materials provided with the distribution.
 
-* Neither the name of Kevin Decker nor the names of its
-  contributors may be used to endorse or promote products
-  derived from this software without specific prior
-  written permission.
+3. Neither the name of the copyright holder nor the names of its
+   contributors may be used to endorse or promote products derived from
+   this software without specific prior written permission.
 
-THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS" AND ANY EXPRESS OR
-IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE IMPLIED WARRANTIES OF MERCHANTABILITY AND
-FITNESS FOR A PARTICULAR PURPOSE ARE DISCLAIMED. IN NO EVENT SHALL THE COPYRIGHT OWNER OR
-CONTRIBUTORS BE LIABLE FOR ANY DIRECT, INDIRECT, INCIDENTAL, SPECIAL, EXEMPLARY, OR CONSEQUENTIAL
-DAMAGES (INCLUDING, BUT NOT LIMITED TO, PROCUREMENT OF SUBSTITUTE GOODS OR SERVICES; LOSS OF USE,
-DATA, OR PROFITS; OR BUSINESS INTERRUPTION) HOWEVER CAUSED AND ON ANY THEORY OF LIABILITY, WHETHER
-IN CONTRACT, STRICT LIABILITY, OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT
-OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
+THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS"
+AND ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE
+IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE ARE
+DISCLAIMED. IN NO EVENT SHALL THE COPYRIGHT HOLDER OR CONTRIBUTORS BE LIABLE
+FOR ANY DIRECT, INDIRECT, INCIDENTAL, SPECIAL, EXEMPLARY, OR CONSEQUENTIAL
+DAMAGES (INCLUDING, BUT NOT LIMITED TO, PROCUREMENT OF SUBSTITUTE GOODS OR
+SERVICES; LOSS OF USE, DATA, OR PROFITS; OR BUSINESS INTERRUPTION) HOWEVER
+CAUSED AND ON ANY THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY,
+OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE
+OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
+
+```
+
+### jsdom
+
+This product includes source derived from [jsdom](https://github.com/jsdom/jsdom) ([v25.0.1](https://github.com/jsdom/jsdom/tree/v25.0.1)), distributed under the [MIT License](https://github.com/jsdom/jsdom/blob/v25.0.1/LICENSE.txt):
+
+```
+Copyright (c) 2010 Elijah Insua
+
+Permission is hereby granted, free of charge, to any person
+obtaining a copy of this software and associated documentation
+files (the "Software"), to deal in the Software without
+restriction, including without limitation the rights to use,
+copy, modify, merge, publish, distribute, sublicense, and/or sell
+copies of the Software, and to permit persons to whom the
+Software is furnished to do so, subject to the following
+conditions:
+
+The above copyright notice and this permission notice shall be
+included in all copies or substantial portions of the Software.
+
+THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND,
+EXPRESS OR IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES
+OF MERCHANTABILITY, FITNESS FOR A PARTICULAR PURPOSE AND
+NONINFRINGEMENT. IN NO EVENT SHALL THE AUTHORS OR COPYRIGHT
+HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER LIABILITY,
+WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING
+FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR
+OTHER DEALINGS IN THE SOFTWARE.
+
 ```
 
 ### mocha
 
-This product includes source derived from [mocha](https://github.com/mochajs/mocha) ([v10.4.0](https://github.com/mochajs/mocha/tree/v10.4.0)), distributed under the [MIT License](https://github.com/mochajs/mocha/blob/v10.4.0/LICENSE):
+This product includes source derived from [mocha](https://github.com/mochajs/mocha) ([v10.8.2](https://github.com/mochajs/mocha/tree/v10.8.2)), distributed under the [MIT License](https://github.com/mochajs/mocha/blob/v10.8.2/LICENSE):
 
 ```
 (The MIT License)
 
-Copyright (c) 2011-2022 OpenJS Foundation and contributors, https://openjsf.org
+Copyright (c) 2011-2024 OpenJS Foundation and contributors, https://openjsf.org
 
 Permission is hereby granted, free of charge, to any person obtaining
 a copy of this software and associated documentation files (the
@@ -792,9 +823,35 @@ TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION WITH THE
 SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 ```
 
+### webpack-obfuscator
+
+This product includes source derived from [webpack-obfuscator](https://github.com/javascript-obfuscator/webpack-obfuscator) ([v3.5.1](https://github.com/javascript-obfuscator/webpack-obfuscator/tree/v3.5.1)), distributed under the [BSD-2-Clause License](https://github.com/javascript-obfuscator/webpack-obfuscator/blob/v3.5.1/LICENSE.BSD):
+
+```
+Redistribution and use in source and binary forms, with or without
+modification, are permitted provided that the following conditions are met:
+
+  * Redistributions of source code must retain the above copyright
+    notice, this list of conditions and the following disclaimer.
+  * Redistributions in binary form must reproduce the above copyright
+    notice, this list of conditions and the following disclaimer in the
+    documentation and/or other materials provided with the distribution.
+
+THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS"
+AND ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE
+IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE
+ARE DISCLAIMED. IN NO EVENT SHALL <COPYRIGHT HOLDER> BE LIABLE FOR ANY
+DIRECT, INDIRECT, INCIDENTAL, SPECIAL, EXEMPLARY, OR CONSEQUENTIAL DAMAGES
+(INCLUDING, BUT NOT LIMITED TO, PROCUREMENT OF SUBSTITUTE GOODS OR SERVICES;
+LOSS OF USE, DATA, OR PROFITS; OR BUSINESS INTERRUPTION) HOWEVER CAUSED AND
+ON ANY THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT
+(INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF
+THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
+```
+
 ### webpack
 
-This product includes source derived from [webpack](https://github.com/webpack/webpack) ([v5.91.0](https://github.com/webpack/webpack/tree/v5.91.0)), distributed under the [MIT License](https://github.com/webpack/webpack/blob/v5.91.0/LICENSE):
+This product includes source derived from [webpack](https://github.com/webpack/webpack) ([v5.98.0](https://github.com/webpack/webpack/tree/v5.98.0)), distributed under the [MIT License](https://github.com/webpack/webpack/blob/v5.98.0/LICENSE):
 
 ```
 Copyright JS Foundation and other contributors

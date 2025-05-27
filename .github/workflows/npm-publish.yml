@@ -12,11 +12,6 @@ on:
         description: 'Path within the S3 bucket'
         required: false
         type: string
-      publish-to-npm:
-        description: 'Whether to publish to NPM'
-        required: false
-        type: boolean
-        default: false
       file-to-upload:
         description: 'Specific file to upload to S3'
         required: false
@@ -68,7 +63,6 @@ jobs:
         run: |
           PACKAGE_VERSION=$(node -p "require('./package.json').version")
           echo "PACKAGE_VERSION=$PACKAGE_VERSION" >> $GITHUB_ENV
-
       - name: Run security audit
         run: npm audit --audit-level=critical
 
@@ -78,7 +72,6 @@ jobs:
         run: |
           echo "//registry.npmjs.org/:_authToken=${NPM_TOKEN}" > ~/.npmrc
           npm publish
-
       - name: Configure AWS Credentials
         if: ${{ inputs.s3-path != '' }}
         uses: aws-actions/configure-aws-credentials@v2
