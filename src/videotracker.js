@@ -1050,6 +1050,10 @@ VideoTracker.Events = {
 
 // Private members
 function funnelAdEvents(e) {
+  if (e.type === VideoTracker.Events.AD_ERROR) {
+    this.sendVideoErrorAction(e.type, e.data);
+    return;
+  }
   this.sendVideoAdAction(e.type, e.data);
 }
 
