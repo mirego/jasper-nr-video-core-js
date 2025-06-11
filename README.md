@@ -51,26 +51,13 @@ tracker.sendVideoErrorAction("ErrorEvent", { data: "error-test" });
 tracker.sendVideoCustomAction("CustomEvent", { data: "custom-test" });
 ```
 
-Of course, you may want to use built-in events for video. Luckily for you, this core library
-provides an easy way of sending video-related content, using `tracker.sendXXXXX` methods.
-
-```javascript
-tracker.sendRequest(); // Will send CONTENT_REQUEST
-```
-
-Search for `Tracker#sendXXXX` events in the documentation to read more about it.
-
 ## Data Model
 
-To understand which actions and attributes are captured and emitted by the tracker under different event types, see [DataModel.md](./DATAMODEL.md).
+To understand which actions and attributes are captured and emitted by the tracker under different event types, see [DataModel.md](DATAMODEL.md).
 
 ## Documentation
 
 All classes are documented using autodocs. The documents, generated with [jsdoc](https://github.com/jsdoc/jsdoc), can be found in the `documentation` directory of the current repo.
-
-# Open source license
-
-This project is distributed under the [Apache 2 license](LICENSE).
 
 # Support
 
@@ -93,3 +80,9 @@ Issues and enhancement requests can be submitted in the [Issues tab of this repo
 Contributions are encouraged! If you submit an enhancement request, we'll invite you to contribute the change yourself. Please review our [Contributors Guide](CONTRIBUTING.md).
 
 Keep in mind that when you submit your pull request, you'll need to sign the CLA via the click-through using CLA-Assistant. If you'd like to execute our corporate CLA, or if you have any questions, please drop us an email at opensource+videoagent@newrelic.com.
+
+# License
+
+This project is distributed under the [Apache 2.0](https://apache.org/licenses/LICENSE-2.0.txt) License.
+
+The video-core also uses source code from third-party libraries. Full details on which libraries are used and the terms under which they are licensed can be found in the [third-party notices document](THIRD_PARTY_NOTICES.md).
