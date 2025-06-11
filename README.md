@@ -51,15 +51,6 @@ tracker.sendVideoErrorAction("ErrorEvent", { data: "error-test" });
 tracker.sendVideoCustomAction("CustomEvent", { data: "custom-test" });
 ```
 
-Of course, you may want to use built-in events for video. Luckily for you, this core library
-provides an easy way of sending video-related content, using `tracker.sendXXXXX` methods.
-
-```javascript
-tracker.sendRequest(); // Will send CONTENT_REQUEST
-```
-
-Search for `Tracker#sendXXXX` events in the documentation to read more about it.
-
 ## Data Model
 
 To understand which actions and attributes are captured and emitted by the tracker under different event types, see [DataModel.md](./DATAMODEL.md).
