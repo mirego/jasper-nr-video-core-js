@@ -42,11 +42,10 @@
       nrvideo.Core.addTracker(myTracker);
 
       // Send a sample event
-      // myTracker.sendVideoCustomAction("CUSTOM_WITH_ATT", "timeSinceCustom");
-      // myTracker.sendVideoAction("SAMPLE_STARTED", {
-      //   videoElementId: myPlayer.id,
-      // });
-      myTracker.sendDownload();
+      myTracker.sendVideoCustomAction("CUSTOM_WITH_ATT", "timeSinceCustom");
+      myTracker.sendVideoAction("SAMPLE_STARTED", {
+        videoElementId: myPlayer.id,
+      });
     </script>
   </body>
 </html>
