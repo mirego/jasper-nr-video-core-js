@@ -23,7 +23,7 @@
   "contributors": [
     "Andreu Santarén Llop"
   ],
-  "license": "MIT",
+  "license": "Apache-2.0",
   "devDependencies": {
     "@babel/core": "^7.24.5",
     "@babel/plugin-transform-modules-commonjs": "^7.24.1",
@@ -46,6 +46,7 @@
     "THIRD_PARTY_NOTICES.md",
     "dist",
     "CHANGELOG.md",
+    "LICENSE",
     "README.md",
     "!test"
   ],

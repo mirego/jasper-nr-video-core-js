@@ -5,7 +5,7 @@
     <script type="text/javascript" src="agent.js"></script>
 
     <!-- newrelic video core -->
-    <script src="../dist/newrelic-video-core.min.js"></script>
+    <script src="../dist/umd/nrvideo.min.js"></script>
   </head>
 
   <body>
@@ -42,10 +42,11 @@
       nrvideo.Core.addTracker(myTracker);
 
       // Send a sample event
-      myTracker.sendVideoCustomAction("CUSTOM_WITH_ATT", "timeSinceCustom");
-      myTracker.sendVideoAction("SAMPLE_STARTED", {
-        videoElementId: myPlayer.id,
-      });
+      // myTracker.sendVideoCustomAction("CUSTOM_WITH_ATT", "timeSinceCustom");
+      // myTracker.sendVideoAction("SAMPLE_STARTED", {
+      //   videoElementId: myPlayer.id,
+      // });
+      myTracker.sendDownload();
     </script>
   </body>
 </html>
