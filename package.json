@@ -48,9 +48,10 @@
     "CHANGELOG.md",
     "LICENSE",
     "README.md",
+    "src",
     "!test"
   ],
-   "publishConfig": {
+  "publishConfig": {
     "access": "public"
   }
 }
