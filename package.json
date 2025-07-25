@@ -45,12 +45,13 @@
   "files": [
     "THIRD_PARTY_NOTICES.md",
     "dist",
+    "src",
     "CHANGELOG.md",
     "LICENSE",
     "README.md",
     "!test"
   ],
-   "publishConfig": {
+  "publishConfig": {
     "access": "public"
   }
 }

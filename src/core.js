@@ -1,5 +1,6 @@
 import Log from "./log";
-import Backend from "./backend";
+import { recordCustomEvent } from "./recordCustomEvent";
+import { authValidator } from "./authValidator";
 
 /**
  * Static class that sums up core functionalities of the library.
@@ -11,7 +12,8 @@ class Core {
    *
    * @param {(Emitter|Tracker)} tracker Tracker instance to add.
    */
-  static addTracker(tracker) {
+  static addTracker(tracker, options) {
+    authValidator(options.info);
     if (tracker.on && tracker.emit) {
       trackers.push(tracker);
       tracker.on("*", eventHandler);
@@ -44,53 +46,9 @@ class Core {
     return trackers;
   }
 
-  /**
-   * Returns the current backend.
-   *
-   * @returns {Backend} The current backend.
-   */
-  static getBackend() {
-    return backend;
-  }
-
-  /**
-   * Sets the current backend.
-   * @param {Backend} backendInstance Backend instance.
-   */
-  static setBackend(backendInstance) {
-    backend = backendInstance;
-  }
-
-  /**
-   * Sends given event using the appropriate backend.
-   * @param {String} event Event to send.
-   * @param {Object} data Data associated to the event.
-   */
   static send(eventType, actionName, data) {
-    if (
-      Core.getBackend() == undefined ||
-      !(Core.getBackend() instanceof Backend)
-    ) {
-      // Use the default backend (NR Agent)
-      if (typeof newrelic !== "undefined" && newrelic.recordCustomEvent) {
-        if (data !== undefined) {
-          data["timeSinceLoad"] = window.performance.now() / 1000;
-        }
-
-        newrelic.recordCustomEvent(eventType, { actionName, ...data });
-      } else {
-        if (!isErrorShown) {
-          Log.error(
-            "newrelic.recordCustomEvent() is not available.",
-            "In order to use NewRelic Video you will need New Relic Browser Agent."
-          );
-          isErrorShown = true;
-        }
-      }
-    } else {
-      // Use the user-defined backend
-      Core.getBackend().send(eventType, actionName, data);
-    }
+    data["timeSinceLoad"] = window.performance.now() / 1000;
+    recordCustomEvent(eventType, { actionName, ...data });
   }
 
   /**
@@ -106,7 +64,6 @@ class Core {
 }
 
 let trackers = [];
-let backend;
 let isErrorShown = false;
 
 /**

@@ -1,5 +1,3 @@
-import Backend from "./backend";
-import NRInsightsBackend from "./plugins/nrinsightsbackend";
 import Core from "./core";
 import Constants from "./constants";
 import Chrono from "./chrono";
@@ -19,8 +17,6 @@ const nrvideo = {
   VideoTracker,
   VideoTrackerState,
   Core,
-  Backend,
-  NRInsightsBackend,
   version,
 };
 export default nrvideo;

@@ -19,4 +19,16 @@ Constants.AdPositions = {
   POST: "post",
 };
 
+Constants.INTERVAL = 10000;
+Constants.MAX_EVENTS_PER_BATCH = 400;
+Constants.MAX_PAYLOAD_SIZE = 1000000; // 1mb = 10^6 bytes
+Constants.MAX_BEACON_SIZE = 60 * 1000;
+
+Constants.COLLECTOR = {
+  US: "bam.nr-data.net",
+  EU: "bam.eu01.nr-data.net",
+  Stage: "staging-bam-cell.nr-data.net",
+  GOV: "gov-bam.nr-data.net",
+};
+
 export default Constants;
