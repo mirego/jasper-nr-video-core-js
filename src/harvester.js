@@ -1,6 +1,6 @@
 import Constants from "./constants";
 import pkg from "../package.json";
-import { send } from "./utils";
+import { callApi } from "./utils";
 
 const { INTERVAL, MAX_EVENTS_PER_BATCH, MAX_PAYLOAD_SIZE, MAX_BEACON_SIZE } =
   Constants;
@@ -57,6 +57,7 @@ export class Harvester {
 
     // 3. Split the events into chunks that respect size and count limits.
     const chunks = this.chunkEvents(allEvents, maxChunkSize);
+    console.log("chunks", chunks);
 
     // 4. Send each chunk sequentially.
     chunks.forEach((chunk, index) => {
@@ -104,7 +105,7 @@ export class Harvester {
   sendChunk(chunk, options, isLastChunk) {
     const payload = { body: { ins: chunk } };
 
-    send(
+    callApi(
       {
         url: this.#buildUrl(),
         payload: payload,
@@ -115,8 +116,7 @@ export class Harvester {
         if (result.retry) {
           result.chunk = chunk;
         }
-        // Tell the aggregator to clear its backup only after the last chunk is handled.
-        result.allChunksSent = isLastChunk;
+
         this.#aggregate.postHarvestCleanup(result);
       }
     );
@@ -132,7 +132,7 @@ export class Harvester {
       const { beacon, licenseKey, applicationID, sa } = window.NRVIDEO.info;
       if (!beacon || !licenseKey || !applicationID)
         throw new Error(
-          " Options object provided by new relic is not correctly initialsed"
+          " Options object provided by new relic is not correctly initialised"
         );
       const queryParams = new URLSearchParams({
         a: applicationID,

@@ -1,3 +1,6 @@
+import "core-js/stable";
+import "regenerator-runtime/runtime";
+
 import Core from "./core";
 import Constants from "./constants";
 import Chrono from "./chrono";

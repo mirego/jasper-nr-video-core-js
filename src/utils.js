@@ -1,4 +1,4 @@
-export function send({ url, payload, options }, callback) {
+export function callApi({ url, payload, options }, callback) {
   // The Browser Agent sends the 'body' part of the payload object as the actual request body.
   const body = JSON.stringify(payload.body);
 

@@ -20,7 +20,7 @@ Constants.AdPositions = {
 };
 
 Constants.INTERVAL = 10000;
-Constants.MAX_EVENTS_PER_BATCH = 400;
+Constants.MAX_EVENTS_PER_BATCH = 1000;
 Constants.MAX_PAYLOAD_SIZE = 1000000; // 1mb = 10^6 bytes
 Constants.MAX_BEACON_SIZE = 60 * 1000;
 

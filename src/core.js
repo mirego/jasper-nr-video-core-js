@@ -1,6 +1,6 @@
 import Log from "./log";
-import { recordCustomEvent } from "./recordCustomEvent";
-import { authValidator } from "./authValidator";
+import { recordEvent } from "./recordEvent";
+import { setAuthConfig } from "./authConfiguration";
 
 /**
  * Static class that sums up core functionalities of the library.
@@ -13,7 +13,7 @@ class Core {
    * @param {(Emitter|Tracker)} tracker Tracker instance to add.
    */
   static addTracker(tracker, options) {
-    authValidator(options.info);
+    setAuthConfig(options.info);
     if (tracker.on && tracker.emit) {
       trackers.push(tracker);
       tracker.on("*", eventHandler);
@@ -48,7 +48,7 @@ class Core {
 
   static send(eventType, actionName, data) {
     data["timeSinceLoad"] = window.performance.now() / 1000;
-    recordCustomEvent(eventType, { actionName, ...data });
+    recordEvent(eventType, { actionName, ...data });
   }
 
   /**

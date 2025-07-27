@@ -10,12 +10,11 @@ const { COLLECTOR } = Constants;
  * @param {string} info.region - The region for the New Relic collector.
  */
 
-export function authValidator(info) {
+export function setAuthConfig(info) {
   try {
     if (isAuthorised(info)) {
       const { licenseKey, appName, region, beacon, sa, applicationID } = info;
-      //applicationID =  '246962787'
-      window.NRVIDEO || (NRVIDEO = {});
+      window.NRVIDEO = window.NRVIDEO || {};
       NRVIDEO.info = {
         beacon: beacon || COLLECTOR[region],
         licenseKey,
