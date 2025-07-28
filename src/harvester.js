@@ -57,7 +57,6 @@ export class Harvester {
 
     // 3. Split the events into chunks that respect size and count limits.
     const chunks = this.chunkEvents(allEvents, maxChunkSize);
-    console.log("chunks", chunks);
 
     // 4. Send each chunk sequentially.
     chunks.forEach((chunk, index) => {

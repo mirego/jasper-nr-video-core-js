@@ -19,7 +19,6 @@ export function callApi({ url, payload, options }, callback) {
     keepalive: options.isFinalHarvest, // Important for final harvest fallback
   })
     .then((response) => {
-      console.log("status", response.status);
       // Check for statuses that indicate a retry is needed.
       const isRetry = shouldRetry(response.status);
       callback({ retry: isRetry, status: response.status });
