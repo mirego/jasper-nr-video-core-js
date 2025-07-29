@@ -31,20 +31,129 @@ Add **scripts** inside `dist` folder to your page.
 
 > If you want to know how to generate `dist` folder, refer to **npm commands** section.
 
-### Registering Trackers
+### Enhanced Video Analytics (Recommended)
 
-`nrvideo` provides a class called `VideoTracker` that will serve as an interface with
-_Browser Agent_, allowing you to manage and send events to New Relic.
+The enhanced video analytics system is **enabled by default** and provides improved data collection, adaptive harvesting, and robust error handling.
 
-First of all, you have to add a tracker in the core class:
+#### Simple Usage
+
+```javascript
+import { VideoTracker } from 'nrvideo';
+
+// Basic usage - enhanced analytics enabled automatically
+const tracker = new VideoTracker(player);
+
+// The system automatically:
+// ✅ Enables enhanced harvesting
+// ✅ Starts the harvest scheduler
+// ✅ Uses smart default configuration
+// ✅ Handles all event buffering and transmission
+```
+
+#### Custom Configuration
+
+You can override specific settings while keeping sensible defaults:
+
+```javascript
+// Override only what you need - defaults are used for everything else
+const tracker = new VideoTracker(player, {
+  videoAnalytics: {
+    harvestCycleInMs: 20000, // Change to 20 seconds (default: 30s)
+    maxEventsPerBatch: 150,  // Change batch size (default: 100)
+  },
+  deadLetterQueue: {
+    maxRetries: 5,           // More retries (default: 3)
+  }
+});
+
+// Alternative: Configure globally then create tracker
+import { setVideoConfig } from 'nrvideo';
+
+setVideoConfig({
+  videoAnalytics: {
+    harvestCycleInMs: 15000, // 15 seconds
+    enableAdaptiveHarvesting: false, // Disable adaptive timing
+  }
+});
+
+const tracker = new VideoTracker(player);
+```
+
+#### Disable Enhanced Analytics
+
+If you need to use legacy mode:
+
+```javascript
+// Disable enhanced analytics entirely
+const tracker = new VideoTracker(player, {
+  useEnhancedHarvesting: false
+});
+```
+
+#### Advanced Usage
+
+```javascript
+// Access enhanced features
+const metrics = tracker.getAnalyticsMetrics();
+console.log('Buffer size:', metrics.buffer.totalEvents);
+console.log('Success rate:', metrics.scheduler.harvestsSuccessful);
+
+// Force immediate transmission
+await tracker.forceHarvest();
+
+// Adjust harvest timing
+tracker.setHarvestInterval(10000); // 10 seconds
+
+// Check if enhanced analytics is active
+if (tracker.isEnhancedAnalyticsEnabled()) {
+  console.log('Enhanced analytics is running');
+}
+```
+
+#### Sending Events
+
+The enhanced system automatically handles event buffering, chunking, and transmission:
+
+```javascript
+// All events are automatically enhanced and buffered
+tracker.sendVideoAction("VideoEvent", { 
+  currentTime: 120.5,
+  duration: 300,
+  playbackRate: 1.0 
+});
+
+tracker.sendVideoAdAction("AdEvent", { 
+  adType: "preroll",
+  adDuration: 30,
+  adPosition: "start"
+});
+
+tracker.sendVideoErrorAction("ErrorEvent", { 
+  errorCode: "PLAYBACK_ERROR",
+  errorMessage: "Failed to load video",
+  timestamp: Date.now()
+});
+
+tracker.sendVideoCustomAction("CustomEvent", { 
+  customMetric: "user_engagement",
+  value: 85.7
+});
+
+// Events are automatically:
+// ✅ Buffered in FIFO order
+// ✅ Chunked for optimal transmission
+// ✅ Retried on failure with exponential backoff
+// ✅ Monitored for performance metrics
+// ✅ Transmitted at optimal intervals
+```
+
+### Legacy Basic Usage
+
+For backward compatibility, the basic tracker interface is still supported:
 
 ```javascript
 var tracker = new VideoTracker(player);
-```
 
-Once the tracker is added, any event it emits will be sent to New Relic and processed by the following functions:
-
-```javascript
 tracker.sendVideoAction("VideoEvent", { data: 1 });
 tracker.sendVideoAdAction("AdEvent", { data: "test-1" });
 tracker.sendVideoErrorAction("ErrorEvent", { data: "error-test" });
@@ -54,6 +163,8 @@ tracker.sendVideoCustomAction("CustomEvent", { data: "custom-test" });
 ## Data Model
 
 To understand which actions and attributes are captured and emitted by the tracker under different event types, see [DataModel.md](DATAMODEL.md).
+
+For detailed information about the enhanced video analytics data flow, processing, and API interactions, see [Enhanced Data Flow Documentation](ENHANCED_DATA_FLOW.md).
 
 ## Documentation
 

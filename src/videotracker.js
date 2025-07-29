@@ -1,6 +1,8 @@
 import Log from "./log";
 import Tracker from "./tracker";
 import TrackerState from "./videotrackerstate";
+import { HarvestScheduler } from "./harvestScheduler";
+import { setVideoConfig, getVideoConfig, getConfigValue } from "./videoConfiguration";
 import pkg from "../package.json";
 
 /**
@@ -8,19 +10,32 @@ import pkg from "../package.json";
  * Extend this class to create your own video tracker class. Override getter methods and
  * registerListeners/unregisterListeners to provide full integration with your video experience.
  *
+ * Enhanced with automatic video analytics harvesting for optimal performance and reliability.
+ *
  * @example
- * Tracker instances should be added to Core library to start sending data:
- * nrvideo.Core.addTracker(new Tracker())
+ * // Simple usage with enhanced analytics (default)
+ * const tracker = new VideoTracker(player);
+ * 
+ * // With custom configuration
+ * const tracker = new VideoTracker(player, {
+ *   videoAnalytics: {
+ *     harvestCycleInMs: 20000 // Override to 20 seconds
+ *   }
+ * });
  *
  * @extends Tracker
  */
 class VideoTracker extends Tracker {
   /**
    * Constructor, receives player and options.
+   * Automatically initializes enhanced video analytics unless disabled.
    * Lifecycle: constructor > {@link setOptions} > {@link setPlayer} > {@link registerListeners}.
    *
    * @param {Object} [player] Player to track. See {@link setPlayer}.
    * @param {Object} [options] Options for the tracker. See {@link setOptions}.
+   * @param {Object} [options.videoAnalytics] Video analytics configuration overrides
+   * @param {boolean} [options.useEnhancedHarvesting=true] Enable enhanced harvesting
+   * @param {boolean} [options.autoStartScheduler=true] Auto-start harvest scheduler
    */
   constructor(player, options) {
     super();
@@ -46,6 +61,10 @@ class VideoTracker extends Tracker {
     this._userId = null;
 
     options = options || {};
+
+    // Initialize enhanced video analytics with user config
+    this._initializeEnhancedAnalytics(options);
+
     this.setOptions(options);
     if (player) this.setPlayer(player, options.tag);
 
@@ -54,8 +73,127 @@ class VideoTracker extends Tracker {
         this.getTrackerName() +
         " v" +
         this.getTrackerVersion() +
-        " is ready."
+        " is ready." +
+        (this.harvestScheduler ? " Enhanced analytics enabled." : "")
     );
+  }
+
+  /**
+   * Initializes enhanced video analytics with smart defaults.
+   * Users can provide partial configuration to override specific settings.
+   * @param {Object} options - User options including analytics config
+   * @private
+   */
+  _initializeEnhancedAnalytics(options) {
+    // Check if enhanced harvesting should be disabled
+    if (options.useEnhancedHarvesting === false) {
+      Log.info("Enhanced harvesting disabled by user option");
+      this.harvestScheduler = null;
+      return;
+    }
+
+    // Smart default configuration
+    const defaultConfig = {
+      enhancedHarvesting: {
+        enabled: true,
+        autoStart: true,
+      },
+      videoAnalytics: {
+        enabled: true,
+        harvestCycleInMs: 30000, // 30 seconds
+        maxEventsPerBatch: 100,
+        maxPayloadSize: 64000, // 64KB
+        enableRetry: true,
+        enableDeadLettering: true,
+        enableAdaptiveHarvesting: true,
+        enableEventDeduplication: true,
+        enableCompressionOptimization: true,
+      },
+      deadLetterQueue: {
+        enabled: true,
+        maxRetries: 3,
+        retryInterval: 5000,
+        maxRetryDelay: 30000,
+        persistToStorage: true,
+      },
+      httpOptimization: {
+        enabled: true,
+        timeout: 30000,
+        enableRequestDeduplication: true,
+        maxConcurrentRequests: 3,
+      },
+      priorityEventBuffer: {
+        enabled: true,
+        maxBufferSize: 1000,
+        enableStats: true,
+      },
+      adaptiveHarvesting: {
+        enabled: true,
+        minInterval: 5000,
+        maxInterval: 60000,
+        backoffMultiplier: 1.5,
+        maxConsecutiveFailures: 3,
+      },
+    };
+
+    // Merge user config with defaults (deep merge for nested objects)
+    const mergedConfig = this._mergeConfig(defaultConfig, options);
+
+    // Set the video configuration
+    setVideoConfig(mergedConfig);
+
+    // Initialize harvest scheduler if enhanced harvesting is enabled
+    if (mergedConfig.enhancedHarvesting?.enabled !== false) {
+      try {
+        this.harvestScheduler = new HarvestScheduler();
+        
+        // Auto-start scheduler unless disabled
+        if (mergedConfig.enhancedHarvesting?.autoStart !== false && 
+            options.autoStartScheduler !== false) {
+          // Delay start slightly to ensure tracker is fully initialized
+          setTimeout(() => {
+            if (this.harvestScheduler && !this.harvestScheduler.isStarted) {
+              this.harvestScheduler.startScheduler();
+              Log.info("Enhanced harvest scheduler auto-started");
+            }
+          }, 100);
+        }
+
+        Log.info("Enhanced video analytics initialized with harvest scheduler");
+      } catch (error) {
+        Log.error("Failed to initialize enhanced analytics:", error.message);
+        this.harvestScheduler = null;
+      }
+    }
+  }
+
+  /**
+   * Deep merges configuration objects, with user config taking precedence.
+   * @param {Object} defaultConfig - Default configuration
+   * @param {Object} userConfig - User provided configuration
+   * @returns {Object} Merged configuration
+   * @private
+   */
+  _mergeConfig(defaultConfig, userConfig) {
+    const result = { ...defaultConfig };
+
+    for (const key in userConfig) {
+      if (userConfig.hasOwnProperty(key)) {
+        if (key === 'videoAnalytics' || key === 'deadLetterQueue' || 
+            key === 'httpOptimization' || key === 'priorityEventBuffer' || 
+            key === 'adaptiveHarvesting' || key === 'enhancedHarvesting') {
+          // Deep merge for nested configuration objects
+          result[key] = {
+            ...result[key],
+            ...userConfig[key]
+          };
+        } else {
+          result[key] = userConfig[key];
+        }
+      }
+    }
+
+    return result;
   }
 
   /* user can set the user Id  */
@@ -150,13 +288,69 @@ class VideoTracker extends Tracker {
 
   /**
    * Prepares tracker to dispose. Calls unregisterListener and drops references to player and tag.
+   * Also properly cleans up enhanced analytics components.
    */
   dispose() {
     this.stopHeartbeat();
     this.disposeAdsTracker();
+    
+    // Clean up enhanced analytics
+    if (this.harvestScheduler) {
+      try {
+        this.harvestScheduler.destroy();
+        Log.info("Enhanced harvest scheduler disposed");
+      } catch (error) {
+        Log.warn("Error disposing harvest scheduler:", error.message);
+      }
+      this.harvestScheduler = null;
+    }
+    
     this.unregisterListeners();
     this.player = null;
     this.tag = null;
+  }
+
+  /**
+   * Gets enhanced analytics performance metrics if available.
+   * @returns {object|null} Performance metrics or null if enhanced analytics not enabled
+   */
+  getAnalyticsMetrics() {
+    if (this.harvestScheduler) {
+      return this.harvestScheduler.getMetrics();
+    }
+    return null;
+  }
+
+  /**
+   * Forces an immediate harvest of all pending events.
+   * @returns {Promise<object>|null} Harvest result or null if enhanced analytics not enabled
+   */
+  async forceHarvest() {
+    if (this.harvestScheduler) {
+      return await this.harvestScheduler.forceHarvest();
+    }
+    Log.warn("Enhanced analytics not enabled, cannot force harvest");
+    return null;
+  }
+
+  /**
+   * Checks if enhanced analytics is enabled for this tracker.
+   * @returns {boolean} True if enhanced analytics is enabled
+   */
+  isEnhancedAnalyticsEnabled() {
+    return !!this.harvestScheduler;
+  }
+
+  /**
+   * Updates the harvest interval for enhanced analytics.
+   * @param {number} intervalMs - New interval in milliseconds
+   */
+  setHarvestInterval(intervalMs) {
+    if (this.harvestScheduler) {
+      this.harvestScheduler.setHarvestInterval(intervalMs);
+    } else {
+      Log.warn("Enhanced analytics not enabled, cannot set harvest interval");
+    }
   }
 
   /**

@@ -1,0 +1,141 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Enhanced Video Analytics - Simple Example</title>
+</head>
+<body>
+    <h1>Enhanced Video Analytics - Simple Example</h1>
+    
+    <video id="myPlayer" width="640" height="360" controls>
+        <source src="sample-video.mp4" type="video/mp4">
+        Your browser does not support the video tag.
+    </video>
+
+    <div style="margin-top: 20px;">
+        <button onclick="sendTestEvent()">Send Test Event</button>
+        <button onclick="showMetrics()">Show Metrics</button>
+        <button onclick="forceHarvest()">Force Harvest</button>
+        <button onclick="changeInterval()">Change Interval to 10s</button>
+    </div>
+
+    <div id="output" style="margin-top: 20px; padding: 10px; background: #f0f0f0; white-space: pre-wrap;"></div>
+
+    <script type="module">
+        import { VideoTracker, Log } from '../dist/video-core-esm.js';
+
+        // Enable debug logging
+        Log.level = Log.Levels.ALL;
+
+        // Simple usage - enhanced analytics enabled by default
+        const player = document.getElementById('myPlayer');
+        const tracker = new VideoTracker(player);
+
+        // Optional: Custom configuration example
+        // const tracker = new VideoTracker(player, {
+        //     videoAnalytics: {
+        //         harvestCycleInMs: 15000, // 15 seconds instead of default 30s
+        //         maxEventsPerBatch: 50,   // Smaller batches
+        //     }
+        // });
+
+        const output = document.getElementById('output');
+
+        function log(message) {
+            const timestamp = new Date().toISOString();
+            output.textContent += `[${timestamp}] ${message}\n`;
+            console.log(message);
+        }
+
+        // Global functions for buttons
+        window.sendTestEvent = function() {
+            tracker.sendVideoAction("TEST_EVENT", {
+                currentTime: Math.floor(Math.random() * 300),
+                customData: "test-" + Date.now()
+            });
+            log("Test event sent");
+        };
+
+        window.showMetrics = function() {
+            if (tracker.isEnhancedAnalyticsEnabled()) {
+                const metrics = tracker.getAnalyticsMetrics();
+                log("Enhanced Analytics Metrics:");
+                log(`Buffer Events: ${metrics.buffer.totalEvents}`);
+                log(`Harvests Completed: ${metrics.scheduler.harvestsCompleted}`);
+                log(`Success Rate: ${metrics.scheduler.harvestsSuccessful}/${metrics.scheduler.harvestsCompleted}`);
+                log(`Average Harvest Time: ${metrics.scheduler.averageHarvestTime}ms`);
+            } else {
+                log("Enhanced analytics not enabled");
+            }
+        };
+
+        window.forceHarvest = async function() {
+            if (tracker.isEnhancedAnalyticsEnabled()) {
+                log("Forcing harvest...");
+                const result = await tracker.forceHarvest();
+                if (result) {
+                    log(`Harvest completed: ${result.totalEvents} events in ${result.totalChunks} chunks`);
+                } else {
+                    log("Harvest failed or no events to harvest");
+                }
+            } else {
+                log("Enhanced analytics not enabled");
+            }
+        };
+
+        window.changeInterval = function() {
+            tracker.setHarvestInterval(10000); // 10 seconds
+            log("Harvest interval changed to 10 seconds");
+        };
+
+        // Add some video event listeners for demonstration
+        player.addEventListener('play', () => {
+            tracker.sendVideoAction("CONTENT_START", {
+                currentTime: player.currentTime,
+                duration: player.duration
+            });
+            log("Video started - event sent");
+        });
+
+        player.addEventListener('pause', () => {
+            tracker.sendVideoAction("CONTENT_PAUSE", {
+                currentTime: player.currentTime
+            });
+            log("Video paused - event sent");
+        });
+
+        player.addEventListener('ended', () => {
+            tracker.sendVideoAction("CONTENT_END", {
+                currentTime: player.currentTime,
+                duration: player.duration
+            });
+            log("Video ended - event sent");
+        });
+
+        player.addEventListener('error', (e) => {
+            tracker.sendVideoErrorAction("CONTENT_ERROR", {
+                errorCode: e.target.error?.code || 'UNKNOWN',
+                errorMessage: e.target.error?.message || 'Unknown error'
+            });
+            log("Video error - event sent");
+        });
+
+        // Initial status
+        log("Video tracker initialized with enhanced analytics");
+        log(`Enhanced analytics enabled: ${tracker.isEnhancedAnalyticsEnabled()}`);
+        
+        // Send a ready event
+        tracker.sendVideoAction("PLAYER_READY", {
+            playerVersion: "1.0.0",
+            videoElementId: player.id
+        });
+        log("Player ready event sent");
+
+        // Cleanup on page unload
+        window.addEventListener('beforeunload', () => {
+            tracker.dispose();
+        });
+    </script>
+</body>
+</html>
