@@ -1,6 +1,6 @@
-import { EventAggregator } from "./eventAggregator.js";
-import { Harvester } from "./harvester.js";
+import { NRVideoEventAggregator } from "./eventAggregator.js";
+import { NRVideoHarvester } from "./harvester.js";
 
-export const customEventAggregator = new EventAggregator();
-const harvester = new Harvester(customEventAggregator);
+export const customEventAggregator = new NRVideoEventAggregator();
+const harvester = new NRVideoHarvester(customEventAggregator);
 harvester.startTimer();

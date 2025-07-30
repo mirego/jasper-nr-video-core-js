@@ -1,20 +1,21 @@
+import { getPayloadSize } from "./utils";
 import Constants from "./constants";
-const { MAX_EVENTS_PER_BATCH } = Constants;
+const { MAX_EVENTS_PER_BATCH, MAX_PAYLOAD_SIZE } = Constants;
 
 /**
  * A simple aggregator that queues raw events without any statistical aggregation.
  * It includes the necessary save/reload logic for the harvester's retry mechanism.
  */
-export class EventAggregator {
+export class NRVideoEventAggregator {
   #queue = [];
-  #isRetry = false;
+  #retryQueue = [];
 
   /**
    * Checks if the event queue is empty.
    * @returns {boolean}
    */
   isEmpty() {
-    return this.#queue.length === 0;
+    return this.#queue.length === 0 && this.#retryQueue.length === 0;
   }
 
   /**
@@ -22,8 +23,10 @@ export class EventAggregator {
    * Called by the harvester to begin the chunking process.
    */
   drain() {
-    const allEvents = this.#queue;
+    const allEvents = [...this.#retryQueue, ...this.#queue];
     this.#queue = []; // Clear the active queue
+    this.#retryQueue = []; // Clear the retry queue
+
     return allEvents;
   }
 
@@ -32,9 +35,6 @@ export class EventAggregator {
    * @param {object} eventObject - The event to queue.
    */
   add(eventObject) {
-    if (this.#isRetry && this.#queue.length >= MAX_EVENTS_PER_BATCH) {
-      this.#queue.shift();
-    }
     this.#queue.push(eventObject);
   }
 
@@ -45,15 +45,22 @@ export class EventAggregator {
    * @param {object} result - The result from the harvester, containing a 'retry' flag.
    */
   postHarvestCleanup(result) {
-    if (result.retry && result.chunk) {
-      this.#isRetry = true;
-      let retryLength = result.chunk.length;
-      for (let i = 0; i < retryLength; i++) {
-        const shiftObj = result.chunk.shift();
-        this.add(shiftObj);
-      }
-    } else {
-      this.#isRetry = false;
+    if (!result.retry || !result.chunk?.length) {
+      this.#retryQueue = [];
+      return;
     }
+
+    while (
+      this.#retryQueue.length > 0 &&
+      (getPayloadSize(this.#retryQueue) + getPayloadSize(result.chunk) >
+        MAX_PAYLOAD_SIZE ||
+        this.#retryQueue.length + result.chunk.length > MAX_EVENTS_PER_BATCH)
+    ) {
+      // Removes the oldest item from the retry queue to make space
+      this.#retryQueue.shift();
+    }
+
+    // Add the entire failed chunk to the retry queue.
+    this.#retryQueue.push(...result.chunk); // result.chunk will be never greater than 1mb or 1000
   }
 }

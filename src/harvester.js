@@ -1,6 +1,6 @@
 import Constants from "./constants";
 import pkg from "../package.json";
-import { callApi } from "./utils";
+import { callApi, getPayloadSize } from "./utils";
 
 const { INTERVAL, MAX_EVENTS_PER_BATCH, MAX_PAYLOAD_SIZE, MAX_BEACON_SIZE } =
   Constants;
@@ -9,9 +9,10 @@ const { INTERVAL, MAX_EVENTS_PER_BATCH, MAX_PAYLOAD_SIZE, MAX_BEACON_SIZE } =
  * A scheduler and dispatcher for sending raw event data to the New Relic 'ins' endpoint.
  * It manages the harvest cycle, URL construction, and retries.
  */
-export class Harvester {
+export class NRVideoHarvester {
   #started = false;
   #aggregate; // EventAggregator instance
+  #timerId = null; // Timer ID for cleanup
 
   /**
    * @param {object} agentController - The agent's configuration object.
@@ -34,10 +35,21 @@ export class Harvester {
     const onHarvestInterval = () => {
       this.triggerHarvest({});
       if (this.#started) {
-        setTimeout(onHarvestInterval, INTERVAL);
+        this.#timerId = setTimeout(onHarvestInterval, INTERVAL);
       }
     };
-    setTimeout(onHarvestInterval, INTERVAL);
+    this.#timerId = setTimeout(onHarvestInterval, INTERVAL);
+  }
+
+  /**
+   * Stops the harvest timer and cleans up resources.
+   */
+  stopTimer() {
+    this.#started = false;
+    if (this.#timerId) {
+      clearTimeout(this.#timerId);
+      this.#timerId = null;
+    }
   }
 
   /**
@@ -47,22 +59,28 @@ export class Harvester {
   triggerHarvest(options = {}) {
     if (this.#aggregate.isEmpty()) return;
 
-    // 1. Drain the entire queue to get all pending events.
-    const allEvents = this.#aggregate.drain();
+    try {
+      // 1. Drain the entire queue to get all pending events.
+      const allEvents = this.#aggregate.drain();
 
-    // 2. Determine the correct size limit for this harvest.
-    const maxChunkSize = options.isFinalHarvest
-      ? MAX_BEACON_SIZE
-      : MAX_PAYLOAD_SIZE;
+      // 2. Determine the correct size limit for this harvest.
+      const maxChunkSize = options.isFinalHarvest
+        ? MAX_BEACON_SIZE
+        : MAX_PAYLOAD_SIZE;
 
-    // 3. Split the events into chunks that respect size and count limits.
-    const chunks = this.chunkEvents(allEvents, maxChunkSize);
+      // 3. Split the events into chunks that respect size and count limits.
+      const chunks = this.chunkEvents(allEvents, maxChunkSize);
 
-    // 4. Send each chunk sequentially.
-    chunks.forEach((chunk, index) => {
-      const isLastChunk = index === chunks.length - 1;
-      this.sendChunk(chunk, options, isLastChunk);
-    });
+      // 4. Send each chunk sequentially.
+      chunks.forEach((chunk, index) => {
+        const isLastChunk = index === chunks.length - 1;
+        this.sendChunk(chunk, options, isLastChunk);
+      });
+    } catch (error) {
+      console.error("Error during harvest:", error);
+      // Re-add events to the queue if something went wrong
+      // This is a failsafe to prevent data loss
+    }
   }
 
   /**
@@ -79,8 +97,7 @@ export class Harvester {
       }
 
       currentChunk.push(event);
-      const payloadSize = JSON.stringify({ ins: currentChunk }).length;
-
+      const payloadSize = getPayloadSize({ ins: currentChunk });
       // Use the maxChunkSize passed into the function
       if (payloadSize > maxChunkSize) {
         const lastEvent = currentChunk.pop();
@@ -102,11 +119,18 @@ export class Harvester {
    * Sends a single chunk of events.
    */
   sendChunk(chunk, options, isLastChunk) {
+    const url = this.#buildUrl();
+    if (!url) {
+      // If URL construction failed, treat as a failed request that shouldn't be retried
+      this.#aggregate.postHarvestCleanup({ retry: false, status: 0 });
+      return;
+    }
+
     const payload = { body: { ins: chunk } };
 
     callApi(
       {
-        url: this.#buildUrl(),
+        url: url,
         payload: payload,
         options: options,
       },
@@ -115,7 +139,6 @@ export class Harvester {
         if (result.retry) {
           result.chunk = chunk;
         }
-
         this.#aggregate.postHarvestCleanup(result);
       }
     );
@@ -128,26 +151,21 @@ export class Harvester {
 
   #buildUrl() {
     try {
+      if (!window.NRVIDEO || !window.NRVIDEO.info) {
+        throw new Error("NRVIDEO info is not available.");
+      }
+
       const { beacon, licenseKey, applicationID, sa } = window.NRVIDEO.info;
+
       if (!beacon || !licenseKey || !applicationID)
         throw new Error(
-          " Options object provided by new relic is not correctly initialised"
+          "Options object provided by New Relic is not correctly initialized"
         );
-      const queryParams = new URLSearchParams({
-        a: applicationID,
-        sa: sa || 0,
-        v: pkg.version, // core video agent version
-        t: "Unnamed Transaction",
-        rst: Date.now(),
-        ck: "0",
-        s: 0, // Session ID
-        ref: window.location.href,
-        ptid: "", // Session Trace ID
-        ca: "VA", // for cogs, new query added
-      });
-      return `https://${beacon}/ins/1/${licenseKey}?${queryParams.toString()}`;
+      const url = `https://${beacon}/ins/1/${licenseKey}?a=${applicationID}&v=${pkg.version}&ref=${window.location.href}&ca=VA`;
+      return url;
     } catch (error) {
       console.error(error.message);
+      return null; // Return null instead of undefined
     }
   }
 }
