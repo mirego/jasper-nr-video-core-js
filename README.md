@@ -2,6 +2,9 @@
 
 # New Relic Video Core - JavaScript
 
+> **⚠️ BETA VERSION NOTICE**  
+> This version is currently in **beta phase** and is under active development. Features and APIs may change without notice. Use with caution in production environments and expect potential breaking changes in future releases.
+
 The New Relic video tracking core library is the base for all video trackers in the browser platform. It contains the classes and core mechanisms used by the player specific trackers.
 It segregates the events into different event types based on action, such as video-related events going to `VideoAction`, ad-related events to `VideoAdAction`, errors to `VideoErrorAction`, and custom actions to `VideoCustomAction`.
 
@@ -36,10 +39,20 @@ Add **scripts** inside `dist` folder to your page.
 `nrvideo` provides a class called `VideoTracker` that will serve as an interface with
 _Browser Agent_, allowing you to manage and send events to New Relic.
 
-First of all, you have to add a tracker in the core class:
+First, configure the authentication options and initialize a tracker:
 
 ```javascript
-var tracker = new VideoTracker(player);
+const options = {
+  info: {
+    beacon: "your-beacon-url.nr-data.net",
+    errorBeacon: "your-beacon-url.nr-data.net",
+    licenseKey: "your-license-key",
+    applicationID: "your-application-id",
+    sa: 1,
+  },
+};
+
+const tracker = new VideoTracker(player, options);
 ```
 
 Once the tracker is added, any event it emits will be sent to New Relic and processed by the following functions:

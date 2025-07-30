@@ -2,6 +2,11 @@
 
 All notable changes to this project will be documented in this file.
 
+## [3.2.1] - 2025/07/30
+
+### Breaking Change
+
+- Decoupled from browser agent, now uses its own harvesting system for independent data collection.
 
 ## [3.1.1] - 2025/06/09
 
@@ -13,11 +18,11 @@ All notable changes to this project will be documented in this file.
 
 ### Enhancements
 
-* **Publishing to npm:** The package can now be published to npm, making it easily accessible.
+- **Publishing to npm:** The package can now be published to npm, making it easily accessible.
 
 ### Build
 
-* **Distribution Formats:** Added `cjs`, `esm`, and `umd` builds to the `dist` folder, ensuring compatibility with CommonJS, ES Modules, and UMD module formats.
+- **Distribution Formats:** Added `cjs`, `esm`, and `umd` builds to the `dist` folder, ensuring compatibility with CommonJS, ES Modules, and UMD module formats.
 
 ## [3.0.0] - 2025/02/20
 
