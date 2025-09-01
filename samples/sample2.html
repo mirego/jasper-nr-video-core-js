@@ -3,7 +3,7 @@
   <head>
     <script src="./agent.js"></script>
     <!-- newrelic video core -->
-    <script src="../dist/newrelic-video-core.min.js"></script>
+    <script src="../dist/umd/nrvideo.min.js"></script>
   </head>
 
   <body>
@@ -33,17 +33,11 @@
         }
       }
 
-      // Set up a custom backend for event recording, it will be used instead of New Relic Browser Agent
-      // let backend = new nrvideo.NRInsightsBackend("ACCOUNT ID", "API KEY");
-
-      // Set a custom attribute
-      // backend.setAttribute("videoElementId", "myPlayer");
-      // nrvideo.Core.setBackend(backend);
-
       // Init tracker
       nrvideo.Log.level = nrvideo.Log.Levels.ALL;
       var myPlayer = document.getElementById("myPlayer");
-      let myTracker = new MyTracker(myPlayer);
+      let myTracker = new MyTracker(myPlayer, options);
+
       nrvideo.Core.addTracker(myTracker);
 
       // Send a sample events
