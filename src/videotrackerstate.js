@@ -135,6 +135,12 @@ class VideoTrackerState {
     /** Content only. Chrono that counts time since last AD_END. */
     this.timeSinceLastAd = new Chrono();
 
+    /** Chrono that counts time since last error event. */
+    this.timeSinceLastError = new Chrono();
+
+    /** Chrono that counts time since last ad error event. */
+    this.timeSinceLastAdError = new Chrono();
+
     /** Chrono that counts time since last *_RESUME. Only for buffering events. */
     this.timeSinceResumed = new Chrono();
 
@@ -231,6 +237,12 @@ class VideoTrackerState {
         att.timeSinceAdSeekBegin = this.timeSinceSeekBegin.getDeltaTime();
       if (this.isAdBreak)
         att.timeSinceAdBreakBegin = this.timeSinceAdBreakStart.getDeltaTime();
+
+      // Only include timeSinceLastAdError if an ad error has occurred
+      if (this.numberOfErrors > 0 && this.timeSinceLastAdError.startTime > 0) {
+        att.timeSinceLastAdError = this.timeSinceLastAdError.getDeltaTime();
+      }
+
       att.numberOfAds = this.numberOfAds;
     } else {
       // Content only
@@ -250,6 +262,11 @@ class VideoTrackerState {
       att.numberOfVideos = this.numberOfVideos;
     }
     att.numberOfErrors = this.numberOfErrors;
+
+    // Only include timeSinceLastError if an error has occurred
+    if (this.numberOfErrors > 0 && this.timeSinceLastError.startTime > 0) {
+      att.timeSinceLastError = this.timeSinceLastError.getDeltaTime();
+    }
 
     // Playtime
     if (!this.isAd()) {
@@ -561,6 +578,16 @@ class VideoTrackerState {
   goError() {
     this.isError = true;
     this.numberOfErrors++;
+    this.timeSinceLastError.start();
+  }
+
+  /**
+   * Increments error counter and starts ad error timer.
+   */
+  goAdError() {
+    this.isError = true;
+    this.numberOfErrors++;
+    this.timeSinceLastAdError.start();
   }
 
   /**

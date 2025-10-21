@@ -134,10 +134,44 @@ describe("VideoTrackerState", () => {
     expect(state.isAdBreak).to.be.false;
   });
 
-  it("should increment numberOfErrors", () => {
+  it("should increment numberOfErrors and start timeSinceLastError", () => {
     expect(state.numberOfErrors).to.equal(0);
     state.goError();
     expect(state.numberOfErrors).to.equal(1);
+    expect(state.timeSinceLastError.getDeltaTime()).to.be.greaterThan(-1);
+  });
+
+  it("should include timeSinceLastError in state attributes only after error", () => {
+    // Before error, timeSinceLastError should not be present
+    let attributes = state.getStateAttributes();
+    expect(attributes.timeSinceLastError).to.be.undefined;
+
+    // After error, timeSinceLastError should be present
+    state.goError();
+    attributes = state.getStateAttributes();
+    expect(attributes.timeSinceLastError).to.be.a("number");
+    expect(attributes.timeSinceLastError).to.be.greaterThan(-1);
+  });
+
+  it("should increment numberOfErrors and start timeSinceLastAdError", () => {
+    expect(state.numberOfErrors).to.equal(0);
+    state.goAdError();
+    expect(state.numberOfErrors).to.equal(1);
+    expect(state.timeSinceLastAdError.getDeltaTime()).to.be.greaterThan(-1);
+  });
+
+  it("should include timeSinceLastAdError in ad state attributes only after ad error", () => {
+    state.setIsAd(true);
+
+    // Before error, timeSinceLastAdError should not be present
+    let attributes = state.getStateAttributes();
+    expect(attributes.timeSinceLastAdError).to.be.undefined;
+
+    // After ad error, timeSinceLastAdError should be present
+    state.goAdError();
+    attributes = state.getStateAttributes();
+    expect(attributes.timeSinceLastAdError).to.be.a("number");
+    expect(attributes.timeSinceLastAdError).to.be.greaterThan(-1);
   });
 
   it("should start tineSinceLast timers", () => {
