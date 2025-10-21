@@ -573,21 +573,17 @@ class VideoTrackerState {
   }
 
   /**
-   * Increments error counter.
+   * Increments error counter and starts appropriate error timer.
    */
   goError() {
     this.isError = true;
     this.numberOfErrors++;
-    this.timeSinceLastError.start();
-  }
 
-  /**
-   * Increments error counter and starts ad error timer.
-   */
-  goAdError() {
-    this.isError = true;
-    this.numberOfErrors++;
-    this.timeSinceLastAdError.start();
+    if (this.isAd()) {
+      this.timeSinceLastAdError.start();
+    } else {
+      this.timeSinceLastError.start();
+    }
   }
 
   /**
