@@ -2,6 +2,14 @@
 
 All notable changes to this project will be documented in this file.
 
+## [4.0.1] - 2025/10/22
+
+### Enhancements
+
+- **New Timing Attributes: Enhanced Error Tracking ⏱️**
+  - Added `timeSinceLastError` attribute for content events - tracks time in milliseconds since the last content error occurred
+  - Added `timeSinceLastAdError` attribute for ad events - tracks time in milliseconds since the last ad error occurred
+
 ## [4.0.0] - 2025/08/26
 
 ### Standalone Agent: Decoupled & Redesigned
