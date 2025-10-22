@@ -134,10 +134,118 @@ describe("VideoTrackerState", () => {
     expect(state.isAdBreak).to.be.false;
   });
 
-  it("should increment numberOfErrors", () => {
+  it("should increment numberOfErrors and start appropriate error timer", () => {
     expect(state.numberOfErrors).to.equal(0);
+
+    // Test content error
+    state.setIsAd(false);
     state.goError();
     expect(state.numberOfErrors).to.equal(1);
+    expect(state.timeSinceLastError.getDeltaTime()).to.be.greaterThan(-1);
+
+    // Reset and test ad error
+    state.numberOfErrors = 0;
+    state.timeSinceLastError.reset();
+    state.setIsAd(true);
+    state.goError();
+    expect(state.numberOfErrors).to.equal(1);
+    expect(state.timeSinceLastAdError.getDeltaTime()).to.be.greaterThan(-1);
+  });
+
+  it("should include timeSinceLastError in content state attributes only after error", () => {
+    state.setIsAd(false);
+
+    // Before error, timeSinceLastError should not be present
+    let attributes = state.getStateAttributes();
+    expect(attributes.timeSinceLastError).to.be.undefined;
+
+    // After error, timeSinceLastError should be present
+    state.goError();
+    attributes = state.getStateAttributes();
+    expect(attributes.timeSinceLastError).to.be.a("number");
+    expect(attributes.timeSinceLastError).to.be.greaterThan(-1);
+  });
+
+  it("should include timeSinceLastAdError in ad state attributes only after error", () => {
+    state.setIsAd(true);
+
+    // Before error, timeSinceLastAdError should not be present
+    let attributes = state.getStateAttributes();
+    expect(attributes.timeSinceLastAdError).to.be.undefined;
+
+    // After error, timeSinceLastAdError should be present
+    state.goError();
+    attributes = state.getStateAttributes();
+    expect(attributes.timeSinceLastAdError).to.be.a("number");
+    expect(attributes.timeSinceLastAdError).to.be.greaterThan(-1);
+  });
+
+  it("should calculate correct time delta for both ad and content errors", () => {
+    // Test content error first
+    state.setIsAd(false);
+    state.goError();
+
+    // Wait a small amount of time to ensure delta > 0
+    const contentErrorTime = state.timeSinceLastError.getDeltaTime();
+    expect(contentErrorTime).to.be.greaterThan(-1);
+    expect(state.timeSinceLastAdError.getDeltaTime()).to.be.null; // Should not be started for content error
+
+    // Reset state and test ad error
+    state.numberOfErrors = 0;
+    state.timeSinceLastError.reset();
+    state.timeSinceLastAdError.reset();
+
+    state.setIsAd(true);
+    state.goError();
+
+    const adErrorTime = state.timeSinceLastAdError.getDeltaTime();
+    expect(adErrorTime).to.be.greaterThan(-1);
+    expect(state.timeSinceLastError.getDeltaTime()).to.be.null; // Should not be started for ad error
+
+    // Verify that the correct attributes are included based on context
+    // After reset, numberOfErrors is 0, so no error attributes should be included
+    state.setIsAd(false);
+    let contentAttributes = state.getStateAttributes();
+    expect(contentAttributes.timeSinceLastError).to.be.undefined; // numberOfErrors was reset to 0
+    expect(contentAttributes.timeSinceLastAdError).to.be.undefined;
+
+    // Reset numberOfErrors back to 1 to test attribute inclusion
+    state.numberOfErrors = 1;
+    state.setIsAd(true);
+    let adAttributes = state.getStateAttributes();
+    expect(adAttributes.timeSinceLastAdError).to.be.a("number");
+    expect(adAttributes.timeSinceLastAdError).to.be.greaterThan(-1);
+    expect(adAttributes.timeSinceLastError).to.be.undefined;
+  });
+
+  it("should maintain independent timing for content and ad errors", () => {
+    // Start with content error
+    state.setIsAd(false);
+    state.goError();
+    const initialContentTime = state.timeSinceLastError.getDeltaTime();
+
+    // Switch to ad context and trigger ad error
+    state.setIsAd(true);
+    state.goError();
+    const initialAdTime = state.timeSinceLastAdError.getDeltaTime();
+
+    // Verify both timers are running independently
+    expect(initialContentTime).to.be.greaterThan(-1);
+    expect(initialAdTime).to.be.greaterThan(-1);
+    expect(state.numberOfErrors).to.equal(2); // Both errors counted
+
+    // Verify correct attributes in different contexts
+    state.setIsAd(false);
+    let contentAttrs = state.getStateAttributes();
+    expect(contentAttrs.timeSinceLastError).to.be.a("number");
+    expect(contentAttrs.timeSinceLastError).to.be.greaterThan(-1);
+    expect(contentAttrs.timeSinceLastAdError).to.be.undefined;
+
+    state.setIsAd(true);
+    let adAttrs = state.getStateAttributes();
+    expect(adAttrs.timeSinceLastAdError).to.be.a("number");
+    expect(adAttrs.timeSinceLastAdError).to.be.greaterThan(-1);
+    expect(adAttrs.timeSinceLastError).to.be.undefined;
   });
 
   it("should start tineSinceLast timers", () => {
