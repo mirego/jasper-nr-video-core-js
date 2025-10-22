@@ -259,14 +259,15 @@ class VideoTrackerState {
       if (this.isSeeking)
         att.timeSinceSeekBegin = this.timeSinceSeekBegin.getDeltaTime();
       att.timeSinceLastAd = this.timeSinceLastAd.getDeltaTime();
+
+      // Only include timeSinceLastError if a content error has occurred
+      if (this.numberOfErrors > 0 && this.timeSinceLastError.startTime > 0) {
+        att.timeSinceLastError = this.timeSinceLastError.getDeltaTime();
+      }
+
       att.numberOfVideos = this.numberOfVideos;
     }
     att.numberOfErrors = this.numberOfErrors;
-
-    // Only include timeSinceLastError if an error has occurred
-    if (this.numberOfErrors > 0 && this.timeSinceLastError.startTime > 0) {
-      att.timeSinceLastError = this.timeSinceLastError.getDeltaTime();
-    }
 
     // Playtime
     if (!this.isAd()) {
