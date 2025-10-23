@@ -33,7 +33,24 @@ module.exports = [
           use: {
             loader: "babel-loader",
             options: {
-              presets: [["@babel/preset-env"]],
+              presets: [
+                [
+                  "@babel/preset-env",
+                  {
+                    targets: {
+                      chrome: "79",
+                      node: "8",
+                    },
+                    useBuiltIns: "usage",
+                    corejs: 3,
+                  },
+                ],
+              ],
+              plugins: [
+                "@babel/plugin-transform-modules-commonjs",
+                "@babel/plugin-transform-optional-chaining",
+                "@babel/plugin-transform-nullish-coalescing-operator",
+              ],
             },
           },
         },
