@@ -51,6 +51,7 @@
     "LICENSE",
     "README.md",
     "src",
+    "__mock__.js",
     "!test"
   ],
   "publishConfig": {
