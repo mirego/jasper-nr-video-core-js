@@ -2,6 +2,13 @@
 
 All notable changes to this project will be documented in this file.
 
+## [4.0.3] - 2025/11/03
+
+### Chore
+
+- **Unit test: Ad mock**
+  Add mock file for mocks NRVideo for unit testing individual separately
+
 ## [4.0.1] - 2025/10/22
 
 ### Enhancements
