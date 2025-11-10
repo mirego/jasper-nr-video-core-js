@@ -15,11 +15,6 @@ on:
 
   workflow_call:
     inputs:
-      node-version:
-        description: 'Node.js version to use'
-        required: false
-        type: string
-        default: 'lts/*'
       s3-path:
         description: 'Path within the S3 bucket'
         required: false
@@ -50,7 +45,7 @@ permissions:
 
 jobs:
   publish_and_deploy:
-    # if: ${{ github.event.pull_request.merged == true || github.event_name == 'workflow_call' }}
+    if: ${{ github.event.pull_request.merged == true || github.event_name == 'workflow_call' }}
     runs-on: ubuntu-latest
     steps:
     - name: Checkout code
@@ -68,7 +63,8 @@ jobs:
       with:
         # Trusted Publishing requires `npm@11.5.1` or later. Compatible
         # versions of `npm` started shipping with Node.js v24.5.0.
-        node-version: ${{ inputs.node-version || '24.x' }}
+        # Hardcoded to ensure NPM Trusted Publishing compatibility.
+        node-version: '24.x'
         cache: 'npm'
         # This is important. The OIDC exchange requires that the registry
         # URL matches on both ends.
