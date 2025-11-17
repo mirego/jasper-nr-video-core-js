@@ -496,6 +496,9 @@ class VideoTracker extends Tracker {
         this.getBitrate() ||
         this.getWebkitBitrate() ||
         this.getRenditionBitrate();
+
+      this.state.trackContentBitrateState(att.contentBitrate);
+
       att.contentRenditionName = this.getRenditionName();
       att.contentRenditionBitrate = this.getRenditionBitrate();
       att.contentRenditionHeight = this.getRenditionHeight();
@@ -524,7 +527,20 @@ class VideoTracker extends Tracker {
       att[key] = this.customData[key];
     }
 
+    /**
+     * Adds all the attributes and custom attributes for qoe event
+     */
+    this.addQoeAttributes(att);
+
     return att;
+  }
+
+  addQoeAttributes(att) {
+      att = this.state.getQoeAttributes(att);
+      const qoe = att.qoe;
+      for (let key in this.customData) {
+          qoe[key] = this.customData[key];
+      }
   }
 
   /**
