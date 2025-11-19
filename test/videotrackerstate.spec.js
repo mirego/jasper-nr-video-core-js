@@ -266,4 +266,211 @@ describe("VideoTrackerState", () => {
     state.goAdQuartile();
     expect(state.timeSinceLastAdQuartile.getDeltaTime()).to.be.greaterThan(-1);
   });
+
+  describe("QOE KPI Tracking", () => {
+    beforeEach(() => {
+      state = new TrackerState();
+      state.setIsAd(false); // Ensure we're in content mode
+    });
+
+    it("should initialize QOE state variables to correct defaults", () => {
+      expect(state.startupTime).to.be.null;
+      expect(state.peakBitrate).to.equal(0);
+      expect(state.partialAverageBitrate).to.equal(0);
+      expect(state.hadStartupFailure).to.be.false;
+      expect(state.hadPlaybackFailure).to.be.false;
+      expect(state.totalRebufferingTime).to.equal(0);
+      expect(state._firstRequestTimestamp).to.be.null;
+    });
+
+    it("should calculate startupTime correctly on first CONTENT_START after CONTENT_REQUEST", () => {
+      const beforeRequest = Date.now();
+      state.goRequest();
+
+      // Simulate a small delay
+      const delay = 100;
+      const startTime = beforeRequest + delay;
+
+      // Mock Date.now() to return a specific time
+      const originalDateNow = Date.now;
+      Date.now = () => startTime;
+
+      state.goStart();
+
+      expect(state.startupTime).to.be.a("number");
+      expect(state.startupTime).to.be.closeTo(delay, 20);
+
+      // Restore Date.now
+      Date.now = originalDateNow;
+    });
+
+    it("should not recalculate startupTime on subsequent starts", () => {
+      state.goRequest();
+      state.goStart();
+      const firstStartupTime = state.startupTime;
+
+      // Trigger end and start again
+      state.goEnd();
+      state.goRequest();
+      state.goStart();
+
+      // startupTime should remain the same
+      expect(state.startupTime).to.equal(firstStartupTime);
+    });
+
+    it("should track peakBitrate correctly (max value over time)", () => {
+      state.trackContentBitrateState(1000);
+      expect(state.peakBitrate).to.equal(1000);
+
+      state.trackContentBitrateState(1500);
+      expect(state.peakBitrate).to.equal(1500);
+
+      state.trackContentBitrateState(800);
+      expect(state.peakBitrate).to.equal(1500); // Should remain at max
+
+      state.trackContentBitrateState(2000);
+      expect(state.peakBitrate).to.equal(2000);
+    });
+
+    it("should track partialAverageBitrate accumulation", () => {
+      expect(state.partialAverageBitrate).to.equal(0);
+
+      // Simulate playtime progression for weighted average calculation
+      // partialAverageBitrate += (bitrate * totalPlaytime)
+
+      state.totalPlaytime = 1000; // 1 second
+      state.trackContentBitrateState(1000);
+      expect(state.partialAverageBitrate).to.equal(1000 * 1000); // 1,000,000
+
+      state.totalPlaytime = 2000; // 2 seconds
+      state.trackContentBitrateState(1500);
+      expect(state.partialAverageBitrate).to.equal(1000000 + (1500 * 2000)); // 1,000,000 + 3,000,000 = 4,000,000
+
+      state.totalPlaytime = 3000; // 3 seconds
+      state.trackContentBitrateState(800);
+      expect(state.partialAverageBitrate).to.equal(4000000 + (800 * 3000)); // 4,000,000 + 2,400,000 = 6,400,000
+    });
+
+    it("should ignore ad bitrates for QOE tracking", () => {
+      state.setIsAd(true);
+      state.trackContentBitrateState(5000);
+
+      expect(state.peakBitrate).to.equal(0);
+      expect(state.partialAverageBitrate).to.equal(0);
+    });
+
+    it("should set hadStartupFailure=true when error occurs before start", () => {
+      state.goRequest();
+      expect(state.isStarted).to.be.false;
+
+      state.goError();
+      expect(state.hadStartupFailure).to.be.true;
+      expect(state.hadPlaybackFailure).to.be.true;
+    });
+
+    it("should set hadPlaybackFailure=true on any content error", () => {
+      state.goRequest();
+      state.goStart();
+
+      state.goError();
+      expect(state.hadPlaybackFailure).to.be.true;
+    });
+
+    it("should not set hadStartupFailure if error occurs after start", () => {
+      state.goRequest();
+      state.goStart();
+      expect(state.isStarted).to.be.true;
+
+      state.goError();
+      expect(state.hadStartupFailure).to.be.false;
+      expect(state.hadPlaybackFailure).to.be.true;
+    });
+
+    it("should accumulate totalRebufferingTime correctly (excluding initial buffering)", () => {
+      state.goRequest();
+      state.goStart();
+      state.initialBufferingHappened = true;
+
+      // First rebuffer
+      state.goBufferStart();
+      state.timeSinceBufferBegin.getDeltaTime = () => 500; // Mock 500ms
+      state.goBufferEnd();
+      expect(state.totalRebufferingTime).to.equal(500);
+
+      // Second rebuffer
+      state.goBufferStart();
+      state.timeSinceBufferBegin.getDeltaTime = () => 300; // Mock 300ms
+      state.goBufferEnd();
+      expect(state.totalRebufferingTime).to.equal(800);
+    });
+
+    it("should not count initial buffering in totalRebufferingTime", () => {
+      state.goRequest();
+      state.goStart();
+      // initialBufferingHappened starts as false by default
+
+      state.goBufferStart();
+      state.timeSinceBufferBegin.getDeltaTime = () => 1000;
+      const result = state.goBufferEnd();
+
+      // Initial buffering should not be counted when initialBufferingHappened is false
+      expect(state.totalRebufferingTime).to.equal(0);
+
+      // Now set the flag to true to simulate that initial buffering has happened
+      state.initialBufferingHappened = true;
+
+      // Second buffer should be counted as rebuffering
+      state.goBufferStart();
+      state.timeSinceBufferBegin.getDeltaTime = () => 500;
+      state.goBufferEnd();
+
+      expect(state.totalRebufferingTime).to.equal(500);
+    });
+
+    it("should calculate rebufferingRatio correctly", () => {
+      // Set totalPlaytime directly
+      state.totalPlaytime = 10000; // 10 seconds
+      state.totalRebufferingTime = 1000; // 1 second
+
+      const result = state.getQoeAttributes();
+      const qoeAttrs = result.qoe;
+      expect(qoeAttrs["kpi.rebufferingRatio"]).to.be.closeTo(10, 0.1); // 10%
+    });
+
+    it("should handle rebufferingRatio when totalPlaytime is 0", () => {
+      state.totalPlaytime = 0;
+      state.totalRebufferingTime = 1000;
+
+      const result = state.getQoeAttributes();
+      const qoeAttrs = result.qoe;
+      expect(qoeAttrs["kpi.rebufferingRatio"]).to.equal(0);
+    });
+
+    it("getQoeAttributes() should return all KPI attributes with correct structure", () => {
+      // Setup state with known values
+      state.goRequest();
+      state.goStart();
+      state.startupTime = 500;
+      state.peakBitrate = 2000;
+      state.partialAverageBitrate = 6000;
+      state.hadStartupFailure = false;
+      state.hadPlaybackFailure = true;
+      state.totalRebufferingTime = 300;
+      state.totalPlaytime = 5000;
+
+      const result = state.getQoeAttributes();
+      const qoeAttrs = result.qoe;
+
+      expect(result).to.be.an("object");
+      expect(result.qoe).to.be.an("object");
+      expect(qoeAttrs["kpi.startupTime"]).to.equal(500);
+      expect(qoeAttrs["kpi.peakBitrate"]).to.equal(2000);
+      expect(qoeAttrs["kpi.hadStartupFailure"]).to.be.false;
+      expect(qoeAttrs["kpi.hadPlaybackFailure"]).to.be.true;
+      expect(qoeAttrs["kpi.totalRebufferingTime"]).to.equal(300);
+      expect(qoeAttrs["kpi.rebufferingRatio"]).to.be.closeTo(6, 0.1);
+      expect(qoeAttrs["kpi.totalPlaytime"]).to.equal(5000);
+      expect(qoeAttrs["kpi.averageBitrate"]).to.be.a("number");
+    });
+  });
 });
