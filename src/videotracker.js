@@ -497,8 +497,6 @@ class VideoTracker extends Tracker {
         this.getWebkitBitrate() ||
         this.getRenditionBitrate();
 
-      this.state.trackContentBitrateState(att.contentBitrate);
-
       att.contentRenditionName = this.getRenditionName();
       att.contentRenditionBitrate = this.getRenditionBitrate();
       att.contentRenditionHeight = this.getRenditionHeight();
@@ -522,6 +520,8 @@ class VideoTracker extends Tracker {
     }
 
     this.state.getStateAttributes(att);
+
+    this.state.trackContentBitrateState(att.contentBitrate);
 
     for (let key in this.customData) {
       att[key] = this.customData[key];
