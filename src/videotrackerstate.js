@@ -493,7 +493,7 @@ class VideoTrackerState {
 
         // Calculate startup time (content only) - only calculate once
         if (this.startupTime === null && this._firstRequestTimestamp !== null) {
-          this.startupTime = Date.now() - this._firstRequestTimestamp;
+          this.startupTime = Date.now() - this._firstRequestTimestamp - this.totalAdPlaytime;
         }
       }
       this.isStarted = true;
