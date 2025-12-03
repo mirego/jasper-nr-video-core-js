@@ -23,9 +23,8 @@ export function recordEvent(eventType, attributes = {}) {
 
     const { appName, applicationID } = window.NRVIDEO.info;
 
-    const qoeAttrs = attributes.qoe ? JSON.parse(JSON.stringify(attributes.qoe)) : {};
-    // Clean up qoe attributes for eventObject
-    delete attributes.qoe
+    const { qoe, ...eventAttributes } = attributes;
+    const qoeAttrs = qoe ? { ...qoe } : {};
 
     const otherAttrs = {
         ...(applicationID ? {} : { appName }), // Only include appName when no applicationID
@@ -36,7 +35,7 @@ export function recordEvent(eventType, attributes = {}) {
     }
 
     const eventObject = {
-      ...attributes,
+      ...eventAttributes,
       eventType,
       ...otherAttrs,
     };
