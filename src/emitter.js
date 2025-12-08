@@ -49,6 +49,7 @@ class Emitter {
    * @return this
    */
   emit(eventType, event, data) {
+      console.log("emitter", eventType, event, data);
     this._listeners = this._listeners || {};
     data = data || {};
 

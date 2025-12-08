@@ -62,6 +62,14 @@ class Chrono {
     return this.getDeltaTime();
   }
 
+  getDuration() {
+      if(this.stopTime) {
+          return this.offset + (this.stopTime - this.startTime);
+      } else {
+          this.getDeltaTime()
+      }
+  }
+
   /**
    * Creates a copy of the chrono.
    * @returns {Chrono} Cloned chrono

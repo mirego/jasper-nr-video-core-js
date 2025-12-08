@@ -102,12 +102,6 @@ class VideoTrackerState {
     this.hadPlaybackFailure = false;
 
     /**
-     * Timestamp when content was requested (internal tracking for startup time).
-     * @private
-     */
-    this._firstRequestTimestamp = null;
-
-    /**
      * The amount of ms the user has been rebuffering during content playback.
      */
     this.totalRebufferingTime = 0;
@@ -333,14 +327,16 @@ class VideoTrackerState {
     return att;
   }
 
-  getQoeAttributes(att) {
+  getQoeAttributes(att, playtimeSinceLastEvent) {
       att = att || {};
       const kpi = {};
+
+      console.log('getQoeAttributes', att);
 
       try {
           // QoE KPIs - Content only
           if (this.startupTime !== null) {
-              kpi["kpi.startupTime"] = this.startupTime;
+              kpi["kpi.startupTime"] = this.startupTime - playtimeSinceLastEvent.getDuration();
           }
           if (this.peakBitrate > 0) {
               kpi["kpi.peakBitrate"] = this.peakBitrate;
@@ -468,12 +464,6 @@ class VideoTrackerState {
 
       this.timeSinceLastAd.reset();
       this.timeSinceRequested.start();
-
-      // Track timestamp for startup time calculation (content only)
-      if (this._firstRequestTimestamp === null && !this.isAd()) {
-        this._firstRequestTimestamp = Date.now();
-      }
-
       return true;
     } else {
       return false;
@@ -492,8 +482,9 @@ class VideoTrackerState {
         this.numberOfVideos++;
 
         // Calculate startup time (content only) - only calculate once
-        if (this.startupTime === null && this._firstRequestTimestamp !== null) {
-          this.startupTime = Date.now() - this._firstRequestTimestamp - this.totalAdPlaytime;
+        if (this.startupTime === null) {
+            console.log("aravind startupTime", this.timeSinceAdBreakStart);
+          this.startupTime = this.timeSinceRequested.getDeltaTime() - this.timeSinceAdBreakStart.getDeltaTime();
         }
       }
       this.isStarted = true;
@@ -662,6 +653,7 @@ class VideoTrackerState {
     if (!this.isAdBreak) {
       this.isAdBreak = true;
       this.timeSinceAdBreakStart.start();
+        console.log("aravind goAdBreakStart", this.timeSinceAdBreakStart);
       return true;
     } else {
       return false;
@@ -677,7 +669,9 @@ class VideoTrackerState {
       this.isRequested = false;
       this.isAdBreak = false;
       this.totalAdPlaytime = this.timeSinceAdBreakStart.getDeltaTime();
+        console.log("aravind goAdBreakEnd", this.timeSinceAdBreakStart, this.totalAdPlaytime);
       this.timeSinceAdBreakStart.stop();
+        console.log("aravind goAdBreakEnd", this.timeSinceAdBreakStart, this.totalAdPlaytime);
       return true;
     } else {
       return false;
@@ -728,9 +722,10 @@ class VideoTrackerState {
       // Had Startup Failure: error before content started
       if (!this.isStarted) {
         this.hadStartupFailure = true;
+      } else {
+        // Had Playback Failure: any content error
+        this.hadPlaybackFailure = true;
       }
-      // Had Playback Failure: any content error
-      this.hadPlaybackFailure = true;
     }
   }
 

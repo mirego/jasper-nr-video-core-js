@@ -511,6 +511,7 @@ class VideoTracker extends Tracker {
       att.contentPreload = this.getPreload();
       att.contentFps = this.getFps();
 
+        console.log("aravind ", this.adsTracker, this.adsTracker.state.totalAdPlaytime)
       if (
         this.adsTracker != null &&
         this.adsTracker.state.totalAdPlaytime > 0
@@ -518,6 +519,8 @@ class VideoTracker extends Tracker {
         att.totalAdPlaytime = this.adsTracker.state.totalAdPlaytime;
       }
     }
+
+    console.log('ad tracker' , this.adsTracker.state.totalAdPlaytime);
 
     this.state.getStateAttributes(att);
 
@@ -536,7 +539,7 @@ class VideoTracker extends Tracker {
   }
 
   addQoeAttributes(att) {
-      att = this.state.getQoeAttributes(att);
+      att = this.state.getQoeAttributes(att, this.adsTracker.state.playtimeSinceLastEvent);
       const qoe = att.qoe;
       for (let key in this.customData) {
           qoe[key] = this.customData[key];
@@ -641,6 +644,7 @@ class VideoTracker extends Tracker {
         this.parentTracker.state.goLastAd();
       this.state.goViewCountUp();
       this.state.totalPlaytime = 0;
+      this.state.startupTime = 0;
     }
   }
 
@@ -923,6 +927,7 @@ class VideoTracker extends Tracker {
    * @param {Object} [att] Collection of key:value attributes to send with the request.
    */
   sendAdBreakStart(att) {
+      console.log("aravind sendAdBreakStart");
     if (this.isAd() && this.state.goAdBreakStart()) {
       this.state.totalAdPlaytime = 0;
       if (this.parentTracker) this.parentTracker.state.isPlaying = false;
@@ -937,6 +942,7 @@ class VideoTracker extends Tracker {
    * @param {Object} [att] Collection of key:value attributes to send with the request.
    */
   sendAdBreakEnd(att) {
+      console.log("aravind sendAdBreakEnd", att);
     if (this.isAd() && this.state.goAdBreakEnd()) {
       att = att || {};
       att.timeSinceAdBreakBegin =
