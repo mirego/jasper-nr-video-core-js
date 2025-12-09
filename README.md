@@ -3,64 +3,52 @@
 # New Relic Video Core - JavaScript
 
 The New Relic video tracking core library is the base for all video trackers in the browser platform. It contains the classes and core mechanisms used by the player specific trackers.
+It segregates the events into different event types based on action, such as video-related events going to `VideoAction`, ad-related events to `VideoAdAction`, errors to `VideoErrorAction`, and custom actions to `VideoCustomAction`.
 
-## Build
+## Registering Trackers
 
-Install dependencies:
+Any browser-based video tracker can extend the `VideoTracker` class and use its core functionality.
 
-```
-$ npm install
-```
-
-And build:
-
-```
-$ npm run build:dev
-```
-
-Or if you need a production build:
-
-```
-$ npm run build
-```
-
-## Usage
-Add **scripts** inside `dist` folder to your page.
-
-> If you want to know how to generate `dist` folder, refer to **npm commands** section.
-
-### Registering Trackers
-`nrvideo` provides a class called `VideoTracker` that will serve as an interface with 
-*Browser Agent*, allowing you to manage and send events to New Relic.
-
-First of all, you have to add a tracker in the core class:
-```javascript
-// var nrvideo = require('newrelic-video-core')
-var tracker = new nrvideo.VideoTracker()
-nrvideo.Core.addTracker(tracker)
-```
-
-From this point, any event emitted by said tracker will be reported to New Relic:
-```javascript
-tracker.send('EVENT', { data: 1 })
-```
-
-Of course, you may want to use built-in events for video. Luckily for you, this core library
-provides an easy way of sending video-related content, using `tracker.sendXXXXX` methods.
+To initialize a tracker, create an instance of your specific tracker class:
 
 ```javascript
-tracker.sendRequest() // Will send CONTENT_REQUEST
+const options = {
+  info: {
+    licenseKey: "xxxxxxxxxxx",
+    beacon: "xxxxxxxxxx",
+    applicationId: "xxxxxxx",
+  },
+};
+
+// User can get the `info` object by completing the onboarding process on New Relic.
+const tracker = new VideoSpecificTracker(player, options);
 ```
 
-Search for `Tracker#sendXXXX` events in the documentation to read more about it.
+Some of the APIs exposed and commonly used are:
+
+- `tracker.setUserId("userId")` &mdash; Set the user ID.
+- `tracker.setHarvestInterval(30000)` &mdash; Set the harvest interval time (in milliseconds).
+- `tracker.setOptions({ customData: { key: value } })` &mdash; Set custom options or data.
+- `tracker.sendCustom("CustomEvent", { data: "custom-test" })` &mdash; Send a custom event.
+
+Any event emitted by the tracker will be sent to New Relic and processed according to its type.
+
+Once the tracker is added, any event it emits will be sent to New Relic and processed by the following functions:
+
+```javascript
+tracker.sendVideoAction("VideoEvent", { data: 1 });
+tracker.sendVideoAdAction("AdEvent", { data: "test-1" });
+tracker.sendVideoErrorAction("ErrorEvent", { data: "error-test" });
+tracker.sendVideoCustomAction("CustomEvent", { data: "custom-test" });
+```
+
+## Data Model
+
+To understand which actions and attributes are captured and emitted by the tracker under different event types, see [DataModel.md](DATAMODEL.md).
 
 ## Documentation
 
 All classes are documented using autodocs. The documents, generated with [jsdoc](https://github.com/jsdoc/jsdoc), can be found in the `documentation` directory of the current repo.
-
-# Open source license
-
-This project is distributed under the [Apache 2 license](LICENSE).
 
 # Support
 
@@ -83,3 +71,9 @@ Issues and enhancement requests can be submitted in the [Issues tab of this repo
 Contributions are encouraged! If you submit an enhancement request, we'll invite you to contribute the change yourself. Please review our [Contributors Guide](CONTRIBUTING.md).
 
 Keep in mind that when you submit your pull request, you'll need to sign the CLA via the click-through using CLA-Assistant. If you'd like to execute our corporate CLA, or if you have any questions, please drop us an email at opensource+videoagent@newrelic.com.
+
+# License
+
+This project is distributed under the [Apache 2.0](https://apache.org/licenses/LICENSE-2.0.txt) License.
+
+The video-core also uses source code from third-party libraries. Full details on which libraries are used and the terms under which they are licensed can be found in the [third-party notices document](THIRD_PARTY_NOTICES.md).

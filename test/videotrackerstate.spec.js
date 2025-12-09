@@ -1,159 +1,269 @@
-import TrackerState from '../src/videotrackerstate.js'
-import chai from 'chai'
+import TrackerState from "../src/videotrackerstate.js";
+import chai from "chai";
 
-const expect = chai.expect
+const expect = chai.expect;
 
-describe('VideoTrackerState', () => {
-  let state
+describe("VideoTrackerState", () => {
+  let state;
 
   beforeEach(() => {
-    state = new TrackerState()
-  })
+    state = new TrackerState();
+  });
 
-  it('should set isAd', () => {
-    expect(state.isAd()).to.be.false
-    state.setIsAd(true)
-    expect(state.isAd()).to.be.true
-  })
+  it("should set isAd", () => {
+    expect(state.isAd()).to.be.false;
+    state.setIsAd(true);
+    expect(state.isAd()).to.be.true;
+  });
 
-  it('should getViewId', () => {
-    expect(state.getViewId()).to.not.be.undefined
-  })
+  it("should getViewId", () => {
+    expect(state.getViewId()).to.not.be.undefined;
+  });
 
-  it('should output attributes', () => {
-    state.isStarted = true
-    state.isPaused = true
-    state.isBuffering = true
-    state.isSeeking = true
-    state.isAdBreak = true
-    expect(typeof state.getStateAttributes()).to.be.equal('object')
-    state.setIsAd(true)
-    expect(typeof state.getStateAttributes()).to.be.equal('object')
-    state.isRequested = true
-    expect(typeof state.getStateAttributes()).to.be.equal('object')
-    state.setIsAd(false)
-    expect(typeof state.getStateAttributes()).to.be.equal('object')
-  })
+  it("should output attributes", () => {
+    state.isStarted = true;
+    state.isPaused = true;
+    state.isBuffering = true;
+    state.isSeeking = true;
+    state.isAdBreak = true;
+    expect(typeof state.getStateAttributes()).to.be.equal("object");
+    state.setIsAd(true);
+    expect(typeof state.getStateAttributes()).to.be.equal("object");
+    state.isRequested = true;
+    expect(typeof state.getStateAttributes()).to.be.equal("object");
+    state.setIsAd(false);
+    expect(typeof state.getStateAttributes()).to.be.equal("object");
+  });
 
-  it('should playerReady', () => {
-    expect(state.goPlayerReady()).to.be.true
-    expect(state.goPlayerReady()).to.be.false
-    expect(state.isPlayerReady).to.be.true
-  })
+  it("should playerReady", () => {
+    expect(state.goPlayerReady()).to.be.true;
+    expect(state.goPlayerReady()).to.be.false;
+    expect(state.isPlayerReady).to.be.true;
+  });
 
-  it('should request, start and end', () => {
-    expect(state.isRequested).to.be.false
-    expect(state.isStarted).to.be.false
+  it("should request, start and end", () => {
+    expect(state.isRequested).to.be.false;
+    expect(state.isStarted).to.be.false;
 
-    expect(state.goRequest()).to.be.true
-    expect(state.goRequest()).to.be.false
-    expect(state.timeSinceRequested.getDeltaTime()).to.be.greaterThan(-1)
-    expect(state.isRequested).to.be.true
+    expect(state.goRequest()).to.be.true;
+    expect(state.goRequest()).to.be.false;
+    expect(state.timeSinceRequested.getDeltaTime()).to.be.greaterThan(-1);
+    expect(state.isRequested).to.be.true;
 
-    expect(state.goStart()).to.be.true
-    expect(state.goStart()).to.be.false
-    expect(state.timeSinceStarted.getDeltaTime()).to.be.greaterThan(-1)
-    expect(state.isStarted).to.be.true
+    expect(state.goStart()).to.be.true;
+    expect(state.goStart()).to.be.false;
+    expect(state.timeSinceStarted.getDeltaTime()).to.be.greaterThan(-1);
+    expect(state.isStarted).to.be.true;
 
-    expect(state.goEnd()).to.be.true
-    expect(state.goEnd()).to.be.false
-    expect(state.isStarted).to.be.false
-    expect(state.isRequested).to.not.be.true
-  })
+    expect(state.goEnd()).to.be.true;
+    expect(state.goEnd()).to.be.false;
+    expect(state.isStarted).to.be.false;
+    expect(state.isRequested).to.not.be.true;
+  });
 
-  it('should increment numberOfAds', () => {
-    expect(state.numberOfAds).to.equal(0)
-    state.setIsAd(true)
-    state.goRequest()
-    state.goStart()
-    expect(state.numberOfAds).to.equal(1)
-  })
+  it("should increment numberOfAds", () => {
+    expect(state.numberOfAds).to.equal(0);
+    state.setIsAd(true);
+    state.goRequest();
+    state.goStart();
+    expect(state.numberOfAds).to.equal(1);
+  });
 
-  it('should pause and resume', () => {
-    state.goRequest()
-    state.goStart()
+  it("should pause and resume", () => {
+    state.goRequest();
+    state.goStart();
 
-    expect(state.isPaused).to.be.false
+    expect(state.isPaused).to.be.false;
 
-    expect(state.goPause()).to.be.true
-    expect(state.goPause()).to.be.false
-    expect(state.timeSincePaused.getDeltaTime()).to.be.greaterThan(-1)
-    expect(state.isPaused).to.be.true
+    expect(state.goPause()).to.be.true;
+    expect(state.goPause()).to.be.false;
+    expect(state.timeSincePaused.getDeltaTime()).to.be.greaterThan(-1);
+    expect(state.isPaused).to.be.true;
 
-    expect(state.goResume()).to.be.true
-    expect(state.goResume()).to.be.false
-    expect(state.timeSincePaused.getDeltaTime()).to.be.greaterThan(-1)
-    expect(state.isPaused).to.be.false
-  })
+    expect(state.goResume()).to.be.true;
+    expect(state.goResume()).to.be.false;
+    expect(state.timeSincePaused.getDeltaTime()).to.be.greaterThan(-1);
+    expect(state.isPaused).to.be.false;
+  });
 
-  it('should seek', () => {
-    state.goRequest()
-    state.goStart()
+  it("should seek", () => {
+    state.goRequest();
+    state.goStart();
 
-    expect(state.isSeeking).to.be.false
+    expect(state.isSeeking).to.be.false;
 
-    expect(state.goSeekStart()).to.be.true
-    expect(state.goSeekStart()).to.be.false
-    expect(state.timeSinceSeekBegin.getDeltaTime()).to.be.greaterThan(-1)
-    expect(state.isSeeking).to.be.true
+    expect(state.goSeekStart()).to.be.true;
+    expect(state.goSeekStart()).to.be.false;
+    expect(state.timeSinceSeekBegin.getDeltaTime()).to.be.greaterThan(-1);
+    expect(state.isSeeking).to.be.true;
 
-    expect(state.goSeekEnd()).to.be.true
-    expect(state.goSeekEnd()).to.be.false
-    expect(state.timeSinceSeekBegin.getDeltaTime()).to.be.greaterThan(-1)
-    expect(state.isSeeking).to.be.false
-  })
+    expect(state.goSeekEnd()).to.be.true;
+    expect(state.goSeekEnd()).to.be.false;
+    expect(state.timeSinceSeekBegin.getDeltaTime()).to.be.greaterThan(-1);
+    expect(state.isSeeking).to.be.false;
+  });
 
-  it('should buffer', () => {
-    state.goRequest()
-    state.goStart()
+  it("should buffer", () => {
+    state.goRequest();
+    state.goStart();
 
-    expect(state.isBuffering).to.be.false
+    expect(state.isBuffering).to.be.false;
 
-    expect(state.goBufferStart()).to.be.true
-    expect(state.goBufferStart()).to.be.false
-    expect(state.timeSinceBufferBegin.getDeltaTime()).to.be.greaterThan(-1)
-    expect(state.isBuffering).to.be.true
+    expect(state.goBufferStart()).to.be.true;
+    expect(state.goBufferStart()).to.be.false;
+    expect(state.timeSinceBufferBegin.getDeltaTime()).to.be.greaterThan(-1);
+    expect(state.isBuffering).to.be.true;
 
-    expect(state.goBufferEnd()).to.be.true
-    expect(state.goBufferEnd()).to.be.false
-    expect(state.timeSinceBufferBegin.getDeltaTime()).to.be.greaterThan(-1)
-    expect(state.isBuffering).to.be.false
-  })
+    expect(state.goBufferEnd()).to.be.true;
+    expect(state.goBufferEnd()).to.be.false;
+    expect(state.timeSinceBufferBegin.getDeltaTime()).to.be.greaterThan(-1);
+    expect(state.isBuffering).to.be.false;
+  });
 
-  it('should adBreak', () => {
-    expect(state.isAdBreak).to.be.false
+  it("should adBreak", () => {
+    expect(state.isAdBreak).to.be.false;
 
-    expect(state.goAdBreakStart()).to.be.true
-    expect(state.goAdBreakStart()).to.be.false
-    expect(state.timeSinceAdBreakStart.getDeltaTime()).to.be.greaterThan(-1)
-    expect(state.isAdBreak).to.be.true
+    expect(state.goAdBreakStart()).to.be.true;
+    expect(state.goAdBreakStart()).to.be.false;
+    expect(state.timeSinceAdBreakStart.getDeltaTime()).to.be.greaterThan(-1);
+    expect(state.isAdBreak).to.be.true;
 
-    expect(state.goAdBreakEnd()).to.be.true
-    expect(state.goAdBreakEnd()).to.be.false
-    expect(state.timeSinceAdBreakStart.getDeltaTime()).to.be.greaterThan(-1)
-    expect(state.isAdBreak).to.be.false
-  })
+    expect(state.goAdBreakEnd()).to.be.true;
+    expect(state.goAdBreakEnd()).to.be.false;
+    expect(state.timeSinceAdBreakStart.getDeltaTime()).to.be.greaterThan(-1);
+    expect(state.isAdBreak).to.be.false;
+  });
 
-  it('should increment numberOfErrors', () => {
-    expect(state.numberOfErrors).to.equal(0)
-    state.goError()
-    expect(state.numberOfErrors).to.equal(1)
-  })
+  it("should increment numberOfErrors and start appropriate error timer", () => {
+    expect(state.numberOfErrors).to.equal(0);
 
-  it('should start tineSinceLast timers', () => {
-    state.goHeartbeat()
-    expect(state.timeSinceLastHeartbeat.getDeltaTime()).to.be.greaterThan(-1)
+    // Test content error
+    state.setIsAd(false);
+    state.goError();
+    expect(state.numberOfErrors).to.equal(1);
+    expect(state.timeSinceLastError.getDeltaTime()).to.be.greaterThan(-1);
 
-    state.goLastAd()
-    expect(state.timeSinceLastAd.getDeltaTime()).to.be.greaterThan(-1)
+    // Reset and test ad error
+    state.numberOfErrors = 0;
+    state.timeSinceLastError.reset();
+    state.setIsAd(true);
+    state.goError();
+    expect(state.numberOfErrors).to.equal(1);
+    expect(state.timeSinceLastAdError.getDeltaTime()).to.be.greaterThan(-1);
+  });
 
-    state.goDownload()
-    expect(state.timeSinceLastDownload.getDeltaTime()).to.be.greaterThan(-1)
+  it("should include timeSinceLastError in content state attributes only after error", () => {
+    state.setIsAd(false);
 
-    state.goRenditionChange()
-    expect(state.timeSinceLastRenditionChange.getDeltaTime()).to.be.greaterThan(-1)
+    // Before error, timeSinceLastError should not be present
+    let attributes = state.getStateAttributes();
+    expect(attributes.timeSinceLastError).to.be.undefined;
 
-    state.goAdQuartile()
-    expect(state.timeSinceLastAdQuartile.getDeltaTime()).to.be.greaterThan(-1)
-  })
-})
+    // After error, timeSinceLastError should be present
+    state.goError();
+    attributes = state.getStateAttributes();
+    expect(attributes.timeSinceLastError).to.be.a("number");
+    expect(attributes.timeSinceLastError).to.be.greaterThan(-1);
+  });
+
+  it("should include timeSinceLastAdError in ad state attributes only after error", () => {
+    state.setIsAd(true);
+
+    // Before error, timeSinceLastAdError should not be present
+    let attributes = state.getStateAttributes();
+    expect(attributes.timeSinceLastAdError).to.be.undefined;
+
+    // After error, timeSinceLastAdError should be present
+    state.goError();
+    attributes = state.getStateAttributes();
+    expect(attributes.timeSinceLastAdError).to.be.a("number");
+    expect(attributes.timeSinceLastAdError).to.be.greaterThan(-1);
+  });
+
+  it("should calculate correct time delta for both ad and content errors", () => {
+    // Test content error first
+    state.setIsAd(false);
+    state.goError();
+
+    // Wait a small amount of time to ensure delta > 0
+    const contentErrorTime = state.timeSinceLastError.getDeltaTime();
+    expect(contentErrorTime).to.be.greaterThan(-1);
+    expect(state.timeSinceLastAdError.getDeltaTime()).to.be.null; // Should not be started for content error
+
+    // Reset state and test ad error
+    state.numberOfErrors = 0;
+    state.timeSinceLastError.reset();
+    state.timeSinceLastAdError.reset();
+
+    state.setIsAd(true);
+    state.goError();
+
+    const adErrorTime = state.timeSinceLastAdError.getDeltaTime();
+    expect(adErrorTime).to.be.greaterThan(-1);
+    expect(state.timeSinceLastError.getDeltaTime()).to.be.null; // Should not be started for ad error
+
+    // Verify that the correct attributes are included based on context
+    // After reset, numberOfErrors is 0, so no error attributes should be included
+    state.setIsAd(false);
+    let contentAttributes = state.getStateAttributes();
+    expect(contentAttributes.timeSinceLastError).to.be.undefined; // numberOfErrors was reset to 0
+    expect(contentAttributes.timeSinceLastAdError).to.be.undefined;
+
+    // Reset numberOfErrors back to 1 to test attribute inclusion
+    state.numberOfErrors = 1;
+    state.setIsAd(true);
+    let adAttributes = state.getStateAttributes();
+    expect(adAttributes.timeSinceLastAdError).to.be.a("number");
+    expect(adAttributes.timeSinceLastAdError).to.be.greaterThan(-1);
+    expect(adAttributes.timeSinceLastError).to.be.undefined;
+  });
+
+  it("should maintain independent timing for content and ad errors", () => {
+    // Start with content error
+    state.setIsAd(false);
+    state.goError();
+    const initialContentTime = state.timeSinceLastError.getDeltaTime();
+
+    // Switch to ad context and trigger ad error
+    state.setIsAd(true);
+    state.goError();
+    const initialAdTime = state.timeSinceLastAdError.getDeltaTime();
+
+    // Verify both timers are running independently
+    expect(initialContentTime).to.be.greaterThan(-1);
+    expect(initialAdTime).to.be.greaterThan(-1);
+    expect(state.numberOfErrors).to.equal(2); // Both errors counted
+
+    // Verify correct attributes in different contexts
+    state.setIsAd(false);
+    let contentAttrs = state.getStateAttributes();
+    expect(contentAttrs.timeSinceLastError).to.be.a("number");
+    expect(contentAttrs.timeSinceLastError).to.be.greaterThan(-1);
+    expect(contentAttrs.timeSinceLastAdError).to.be.undefined;
+
+    state.setIsAd(true);
+    let adAttrs = state.getStateAttributes();
+    expect(adAttrs.timeSinceLastAdError).to.be.a("number");
+    expect(adAttrs.timeSinceLastAdError).to.be.greaterThan(-1);
+    expect(adAttrs.timeSinceLastError).to.be.undefined;
+  });
+
+  it("should start tineSinceLast timers", () => {
+    state.goHeartbeat();
+    expect(state.timeSinceLastHeartbeat.getDeltaTime()).to.be.greaterThan(-1);
+
+    state.goLastAd();
+    expect(state.timeSinceLastAd.getDeltaTime()).to.be.greaterThan(-1);
+
+    state.goDownload();
+    expect(state.timeSinceLastDownload.getDeltaTime()).to.be.greaterThan(-1);
+
+    state.goRenditionChange();
+    expect(state.timeSinceLastRenditionChange.getDeltaTime()).to.be.greaterThan(
+      -1
+    );
+
+    state.goAdQuartile();
+    expect(state.timeSinceLastAdQuartile.getDeltaTime()).to.be.greaterThan(-1);
+  });
+});
